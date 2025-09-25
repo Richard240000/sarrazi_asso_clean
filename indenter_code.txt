@@ -1,0 +1,34 @@
+Pas forcément un bug 🙂 ça peut être :
+
+Le raccourci est désactivé ou pris par une autre extension
+→ Dans VS Code, fais :
+
+Ctrl+K puis Ctrl+S → ça ouvre les Raccourcis clavier.
+
+Tape Format Document dans la barre de recherche.
+
+Vérifie que le raccourci est bien défini (normalement Shift+Alt+F).
+
+Si ce n’est pas le cas → clique sur l’icône de crayon ✏️ et assigne Shift+Alt+F ou un autre qui te convient.
+
+Pas de formateur configuré pour Dart/Flutter
+VS Code a besoin de savoir quel outil utiliser pour formater.
+
+Ouvre la Palette de commandes (Ctrl+Shift+P).
+
+Tape Format Document With....
+
+Choisis Dart: SDK Formatter.
+
+Clique sur “Set as Default”.
+
+Format on Save comme alternative
+Tu peux activer le format automatique à chaque sauvegarde :
+
+Ouvre File > Preferences > Settings.
+
+Cherche Format On Save.
+
+Coche la case.
+
+Puis fais juste Ctrl+S → ton fichier se reformate.

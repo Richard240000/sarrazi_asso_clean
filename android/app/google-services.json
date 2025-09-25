@@ -1,0 +1,67 @@
+{
+  "project_info": {
+    "project_number": "57335603521",
+    "project_id": "sarrazi-connect",
+    "storage_bucket": "sarrazi-connect.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:57335603521:android:e30e36221b74590d9581c0",
+        "android_client_info": {
+          "package_name": "com.example.association_sarrazi"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC8VSZhP9PZ93sHS3XWr2MMjhy4QIMSoak"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:57335603521:android:e9e1cba74d645d379581c0",
+        "android_client_info": {
+          "package_name": "com.example.sarrazi_asso_clean"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC8VSZhP9PZ93sHS3XWr2MMjhy4QIMSoak"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:57335603521:android:a51453466420d4fb9581c0",
+        "android_client_info": {
+          "package_name": "fr.sarrazi.asso"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC8VSZhP9PZ93sHS3XWr2MMjhy4QIMSoak"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
