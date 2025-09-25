@@ -9,8 +9,8 @@ plugins {
 
 android {
     namespace = "fr.sarrazi.asso"
-    compileSdk = 35
-    ndkVersion = "27.0.12077973"
+    compileSdk = flutter.compileSdkVersion
+    ndkVersion= "29.0.13113456 rc1"
 
     // Chargement du fichier key.properties (si présent)
     val keystorePropertiesFile = rootProject.file("key.properties")
@@ -40,13 +40,10 @@ android {
 
     defaultConfig {
         applicationId = "fr.sarrazi.asso"
-        minSdk = 21
-        targetSdk = 35
-
-        // Utilise les valeurs déterminées ci-dessus
-        versionCode = flutterVersionCodeStr.toInt()
-        versionName = flutterVersionNameStr
-
+        minSdk = flutter.minSdkVersion
+        targetSdk = flutter.targetSdkVersion
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
         multiDexEnabled = true
     }
 

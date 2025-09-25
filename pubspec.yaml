@@ -5,27 +5,27 @@ publish_to: 'none'
 version: 1.0.1+1009
 
 environment:
-  sdk: ^3.7.2
+  sdk: ^3.9.0
 
 dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
   flutter_html: ^3.0.0
-  firebase_auth: ^4.9.0
-  firebase_core: ^2.32.0
-  firebase_messaging: ^14.7.10
-  flutter_local_notifications: 16.2.0
+  firebase_auth: ^6.1.0
+  firebase_core: ^4.1.1
+  firebase_messaging: ^16.0.2
+  flutter_local_notifications: ^19.4.2
   url_launcher: ^6.2.5 # ou la dernière version disponible
   url_launcher_android: ^6.2.5
   http: ^1.2.1
   webview_flutter: ^4.2.2
-  intl: ^0.18.1
-  share_plus: ^7.2.1
+  intl: ^0.20.2
+  share_plus: ^12.0.0
   shared_preferences: ^2.2.2  # <-- ajoute ceci
   dio: ^5.4.0
   path_provider: ^2.1.2
-  permission_handler: ^11.3.0
+  permission_handler: ^12.0.1
   open_file: ^3.3.2
   image_picker: ^1.0.0
   path: any
@@ -36,8 +36,8 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
-  flutter_launcher_icons: ^0.13.1
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.4
 
 flutter_launcher_icons:
   android: true
