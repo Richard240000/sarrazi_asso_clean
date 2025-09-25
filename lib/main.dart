@@ -10,19 +10,17 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
   print("📦 [BG] Notification en arrière-plan : ${message.notification?.title}");
 }
-final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-FlutterLocalNotificationsPlugin();
+
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
 
   // 🔔 Notifications locales
-  const AndroidInitializationSettings initializationSettingsAndroid =
-  AndroidInitializationSettings('@mipmap/ic_launcher');
+  const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
 
-  const InitializationSettings initializationSettings =
-  InitializationSettings(android: initializationSettingsAndroid);
+  const InitializationSettings initializationSettings = InitializationSettings(android: initializationSettingsAndroid);
 
   await flutterLocalNotificationsPlugin.initialize(initializationSettings);
 
@@ -54,39 +52,18 @@ class MyApp extends StatelessWidget {
           backgroundColor: Colors.white,
           elevation: 0,
           centerTitle: true,
-          titleTextStyle: GoogleFonts.poppins(
-            color: Colors.blue[800],
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-          ),
+          titleTextStyle: GoogleFonts.poppins(color: Colors.blue[800], fontSize: 20, fontWeight: FontWeight.w600),
         ),
-        textTheme: GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme).copyWith(
-          displaySmall: GoogleFonts.poppins(
-            fontSize: 24,
-            fontWeight: FontWeight.w600,
-            color: Colors.blue[800],
-          ),
-          bodyLarge: GoogleFonts.poppins(
-            fontSize: 16,
-            color: Colors.grey[800],
-          ),
-        ),
+        textTheme: GoogleFonts.poppinsTextTheme(
+          Theme.of(context).textTheme,
+        ).copyWith(displaySmall: GoogleFonts.poppins(fontSize: 24, fontWeight: FontWeight.w600, color: Colors.blue[800]), bodyLarge: GoogleFonts.poppins(fontSize: 16, color: Colors.grey[800])),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
           fillColor: Colors.grey[50],
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
-          ),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
           contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         ),
-        cardTheme: CardTheme(
-          elevation: 2,
-          margin: EdgeInsets.symmetric(vertical: 8),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
+        cardTheme: CardThemeData(elevation: 2, margin: EdgeInsets.symmetric(vertical: 8), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
       ),
       home: MainWrapper(),
     );
