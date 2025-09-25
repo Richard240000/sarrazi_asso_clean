@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
-import '../models/actualite.dart';
-import '../services/actualite_service.dart';
+import 'package:intl/intl.dart';
+import 'package:sarrazi_asso_clean/models/actualite.dart';
+import 'package:sarrazi_asso_clean/services/actualite_service.dart';
+
 import 'webview_page.dart';
 
 class InformationPage extends StatefulWidget {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:sarrazi_asso_clean/pages/login1_page.dart';
 import 'dart:convert';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -26,10 +27,7 @@ class _AnnuairePageState extends State<AnnuairePage> {
     final isConnected = prefs.getBool('isConnectedToAnnuaire') ?? false;
 
     if (!isConnected) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => Login1Page()),
-      );
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Login1Page()));
     } else {
       _chargerAnnuaire();
     }
@@ -48,19 +46,14 @@ class _AnnuairePageState extends State<AnnuairePage> {
   }
 
   Future<void> _envoyerEmail(String email) async {
-    final Uri emailLaunchUri = Uri(
-      scheme: 'mailto',
-      path: email,
-    );
+    final Uri emailLaunchUri = Uri(scheme: 'mailto', path: email);
     await launchUrl(emailLaunchUri);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Annuaire des voisins'),
-      ),
+      appBar: AppBar(title: Text('Annuaire des voisins')),
       body: ListView.builder(
         itemCount: annuaire.length,
         itemBuilder: (context, index) {
@@ -74,16 +67,7 @@ class _AnnuairePageState extends State<AnnuairePage> {
                 children: [
                   Text('${personne['rue']}, ${personne['numero']}'),
                   Text('${personne['portable']}'),
-                  GestureDetector(
-                    onTap: () => _envoyerEmail(personne['mail']),
-                    child: Text(
-                      '${personne['mail']}',
-                      style: TextStyle(
-                        color: Colors.blue,
-                        decoration: TextDecoration.underline,
-                      ),
-                    ),
-                  ),
+                  GestureDetector(onTap: () => _envoyerEmail(personne['mail']), child: Text('${personne['mail']}', style: TextStyle(color: Colors.blue, decoration: TextDecoration.underline))),
                 ],
               ),
             ),
@@ -93,4 +77,3 @@ class _AnnuairePageState extends State<AnnuairePage> {
     );
   }
 }
-
