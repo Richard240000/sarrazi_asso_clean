@@ -1,16 +1,13 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
-import 'main_wrapper.dart';
+import 'package:sarrazi_asso_clean/main.dart';
 
 class LoginPage extends StatefulWidget {
-  final bool returnToPrevious;
-
-  const LoginPage({super.key, this.returnToPrevious = false});
-
+  const LoginPage({super.key});
   @override
-  _LoginPageState createState() => _LoginPageState();
+  State<LoginPage> createState() => _LoginPageState();
 }
 
 class _LoginPageState extends State<LoginPage> {
@@ -18,15 +15,13 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController passwordController = TextEditingController();
   bool isLoading = false;
 
-  Future<bool> seConnecter() async {
+  Future<void> seConnecter() async {
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Veuillez remplir tous les champs")),
-      );
-      return false;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Veuillez remplir tous les champs")));
+      return;
     }
 
     setState(() => isLoading = true);
@@ -38,61 +33,32 @@ class _LoginPageState extends State<LoginPage> {
         body: jsonEncode({'email': email, 'password': password}),
       );
 
+      print('[DEBUG] Status code : ${response.statusCode}');
+      print('[DEBUG] Corps réponse : ${response.body}');
+
       final data = jsonDecode(response.body);
       if (data['status'] == 'success') {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('email', data['email']);
-        await prefs.setString('nom', data['nom']);
-
-        if (widget.returnToPrevious) {
-          Navigator.pop(context, true);
-        } else {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => MainWrapper()),
-          );
-        }
-        return true;
+        await sharedPreferences.setString('email', data['email']);
+        await sharedPreferences.setString('nom', data['nom']);
+        //Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => AccueilPage()));
+        Navigator.pop(context, true);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data['message'] ?? 'Erreur de connexion')),
-        );
-        return false;
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(data['message'] ?? 'Erreur de connexion')));
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Erreur réseau")),
-      );
-      return false;
+      print('[DEBUG] Erreur : $e');
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Erreur réseau")));
     } finally {
       setState(() => isLoading = false);
     }
   }
 
-  void _navigateToHome() {
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (context) => MainWrapper()),
-      (Route<dynamic> route) => false, // Supprime toutes les routes précédentes
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Connexion"),
-        centerTitle: true,
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        foregroundColor: Colors.blue.shade800,
-      ),
       body: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Colors.blue.shade50, Colors.white],
-          ),
+          gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.blue.shade50, Colors.white]),
         ),
         child: Center(
           child: SingleChildScrollView(
@@ -102,15 +68,17 @@ class _LoginPageState extends State<LoginPage> {
               children: [
                 Card(
                   elevation: 4,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   child: Padding(
                     padding: const EdgeInsets.all(24.0),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.account_circle, size: 64, color: Colors.blue.shade600),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8.0), // ✅ Coins arrondis
+                          child: Image.asset('assets/logoS.png', fit: BoxFit.contain),
+                        ),
+
                         SizedBox(height: 24),
                         TextField(
                           controller: emailController,
@@ -148,55 +116,33 @@ class _LoginPageState extends State<LoginPage> {
                             onPressed: isLoading ? null : seConnecter,
                             style: ElevatedButton.styleFrom(
                               padding: EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                               backgroundColor: Colors.blue.shade600,
                               foregroundColor: Colors.white,
                               elevation: 2,
                             ),
                             child: isLoading
-                                ? SizedBox(
-                              height: 24,
-                              width: 24,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 3,
-                                color: Colors.white,
-                              ),
-                            )
-                                : Text(
-                              "Se connecter",
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
+                                ? SizedBox(height: 24, width: 24, child: CircularProgressIndicator(strokeWidth: 3, color: Colors.white))
+                                : Text("Se connecter", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                          ),
+                        ),
+                        SizedBox(height: 24),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () => Navigator.pop(context),
+                            style: ElevatedButton.styleFrom(
+                              padding: EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              backgroundColor: Color(0xFFbdbdbd),
+                              foregroundColor: Colors.white,
+                              elevation: 2,
                             ),
+                            child: Text("Annuler", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                           ),
                         ),
                       ],
                     ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-      bottomNavigationBar: BottomAppBar(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
-          child: InkWell(
-            onTap: _navigateToHome,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.home, color: Colors.blue.shade600),
-                SizedBox(width: 8),
-                Text(
-                  'Retour à l\'accueil',
-                  style: TextStyle(
-                    color: Colors.blue.shade600,
-                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ],

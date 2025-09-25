@@ -5,7 +5,7 @@ import '../models/actualite.dart';
 class ActualiteService {
   static const String _url = 'https://www.association-sarrazi.fr/news.php';
 
-  Future<List<Actualite>> fetchActualites() async {
+  static Future<List<Actualite>> fetchActualites() async {
     try {
       final response = await http.get(Uri.parse(_url));
 

@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:path_provider/path_provider.dart';
 import 'package:open_file/open_file.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:sarrazi_asso_clean/pages/base_page.dart';
+import 'package:http/http.dart' as http;
 import 'package:share_plus/share_plus.dart';
 
 class DocumentsPage extends StatefulWidget {
@@ -73,32 +75,29 @@ class _DocumentsPageState extends State<DocumentsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Documents'),
-        backgroundColor: Colors.teal,
-      ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              padding: const EdgeInsets.all(10),
-              itemCount: documents.length,
-              itemBuilder: (context, index) {
-                final doc = documents[index];
-                return Card(
-                  margin: const EdgeInsets.symmetric(vertical: 6),
-                  child: ListTile(
-                    leading: const Icon(Icons.picture_as_pdf, color: Colors.redAccent),
-                    title: Text(doc['titre'], style: const TextStyle(fontWeight: FontWeight.bold)),
-                    subtitle: Text('Mis en ligne : ${doc['date_mise_en_ligne']}'),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.download),
-                      onPressed: () => downloadAndShare(doc['url'], doc['titre'] + '.pdf'),
-                    ),
-                  ),
-                );
-              },
-            ),
-    );
+    return BasePage(title: "Documents de l'association", body: getBoby());
+  }
+
+  Widget getBoby() {
+    return isLoading
+        ? const Center(child: CircularProgressIndicator())
+        : documents.isEmpty
+        ? const Center(child: Text('Aucun document disponible.'))
+        : ListView.builder(
+            padding: const EdgeInsets.fromLTRB(16, 30, 16, 16),
+            itemCount: documents.length,
+            itemBuilder: (context, index) {
+              final doc = documents[index];
+              return Card(
+                margin: const EdgeInsets.symmetric(vertical: 6),
+                child: ListTile(
+                  leading: const Icon(Icons.picture_as_pdf, color: Colors.redAccent),
+                  title: Text(doc['titre'], style: const TextStyle(fontWeight: FontWeight.bold)),
+                  subtitle: Text('Mis en ligne : ${doc['date_mise_en_ligne']}'),
+                  trailing: IconButton(icon: const Icon(Icons.download), onPressed: () => downloadAndShare(doc['url'], '${doc['titre']}.pdf')),
+                ),
+              );
+            },
+          );
   }
 }
