@@ -5,7 +5,8 @@ import 'package:intl/intl.dart';
 import 'package:sarrazi_asso_clean/main.dart';
 import 'package:sarrazi_asso_clean/pages/ajouter_annonce_page.dart';
 import 'package:sarrazi_asso_clean/pages/base_page.dart';
-import 'package:sarrazi_asso_clean/pages/login_page.dart';
+
+import 'package:sarrazi_asso_clean/widgets/login_bottom_sheet.dart';
 
 class AnnoncesPages extends StatefulWidget {
   const AnnoncesPages({super.key});
@@ -100,7 +101,10 @@ class _AnnoncesPagesState extends State<AnnoncesPages> {
 
   Future<void> _ajouterAnnonce() async {
     if (sharedPreferences.getString('nom')?.isEmpty ?? true) {
-      await Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage()));
+      await showModalBottomSheet(context: context, builder: (context) => LoginBottomSheet(), isScrollControlled: true);
+      setState(() {
+        utilisateur = sharedPreferences.getString('nom');
+      });
     }
     if (sharedPreferences.getString('nom')?.isNotEmpty ?? false) {
       if (!context.mounted) return;

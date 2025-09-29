@@ -8,7 +8,7 @@ import 'package:sarrazi_asso_clean/pages/annuaire_page.dart';
 import 'package:sarrazi_asso_clean/pages/artisans_page.dart';
 import 'package:sarrazi_asso_clean/pages/documents_page.dart';
 import 'package:sarrazi_asso_clean/pages/base_page.dart';
-import 'package:sarrazi_asso_clean/pages/login_page.dart';
+import 'package:sarrazi_asso_clean/widgets/login_bottom_sheet.dart';
 
 class AccueilPage extends StatefulWidget {
   const AccueilPage({super.key});
@@ -67,8 +67,12 @@ class _AccueilPageState extends State<AccueilPage> {
                 color: Color(0xFF4527A0),
                 onTap: () async {
                   if (sharedPreferences.getString('nom')?.isEmpty ?? true) {
-                    await Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage()));
+                    await showModalBottomSheet(context: context, builder: (context) => LoginBottomSheet(), isScrollControlled: true);
+                    setState(() {
+                      utilisateur = sharedPreferences.getString('nom');
+                    });
                   }
+
                   if (sharedPreferences.getString('nom')?.isNotEmpty ?? false) {
                     if (!mounted) return;
                     Navigator.push(context, MaterialPageRoute(builder: (context) => AnnuairePage()));

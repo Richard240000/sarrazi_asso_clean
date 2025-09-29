@@ -7,7 +7,7 @@ import 'package:sarrazi_asso_clean/pages/annonces_page.dart';
 import 'package:sarrazi_asso_clean/pages/annuaire_page.dart';
 import 'package:sarrazi_asso_clean/pages/artisans_page.dart';
 import 'package:sarrazi_asso_clean/pages/documents_page.dart';
-import 'package:sarrazi_asso_clean/pages/login_page.dart';
+import 'package:sarrazi_asso_clean/widgets/login_bottom_sheet.dart';
 
 class BasePage extends StatefulWidget {
   const BasePage({super.key, required this.title, required this.body, this.isHome = false, this.floatingButton, this.isBottomBarVisible = true});
@@ -112,7 +112,10 @@ class _BasePageState extends State<BasePage> {
                                     break;
                                   case "Annuaire":
                                     if (utilisateur?.isEmpty ?? true) {
-                                      await Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage()));
+                                      await showModalBottomSheet(context: context, builder: (context) => LoginBottomSheet(), isScrollControlled: true);
+                                      setState(() {
+                                        utilisateur = sharedPreferences.getString('nom');
+                                      });
                                     }
                                     if (utilisateur?.isNotEmpty ?? false) {
                                       if (!context.mounted) return;
