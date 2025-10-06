@@ -92,14 +92,72 @@ class _BasePageState extends State<BasePage> {
                               onPressed: () async {
                                 final result = await showMenu(
                                   context: context,
+                                  color: Colors.blue[800],
                                   position: RelativeRect.fromLTRB(1000.0, 1000.0, 0.0, 0.0),
                                   items: <PopupMenuItem<String>>[
-                                    const PopupMenuItem<String>(value: 'Alerte-Info', child: Text('Alerte-Info')),
-                                    const PopupMenuItem<String>(value: 'Documents', child: Text('Documents')),
-                                    const PopupMenuItem<String>(value: 'Annuaire', child: Text('Annuaire')),
-                                    const PopupMenuItem<String>(value: 'Artisans', child: Text('Artisans')),
-                                    const PopupMenuItem<String>(value: 'Agenda', child: Text('Agenda')),
-                                    const PopupMenuItem<String>(value: 'Annonces', child: Text('Annonces')),
+                                    const PopupMenuItem<String>(
+                                      value: 'Alerte-Info',
+                                      child: Row(
+                                        spacing: 10,
+                                        children: [
+                                          Icon(Icons.campaign, size: 25, color: Colors.white),
+                                          Text('Alerte-Info', style: TextStyle(color: Colors.white)),
+                                        ],
+                                      ),
+                                    ),
+                                    const PopupMenuItem<String>(
+                                      value: 'Documents',
+                                      child: Row(
+                                        spacing: 10,
+                                        children: [
+                                          Icon(Icons.picture_as_pdf, size: 25, color: Colors.white),
+                                          Text('Documents', style: TextStyle(color: Colors.white)),
+                                          Icon(Icons.lock, size: 15, color: Colors.white),
+                                        ],
+                                      ),
+                                    ),
+                                    const PopupMenuItem<String>(
+                                      value: 'Annuaire',
+                                      child: Row(
+                                        spacing: 10,
+                                        children: [
+                                          Icon(Icons.contact_phone, size: 25, color: Colors.white),
+                                          Text('Annuaire', style: TextStyle(color: Colors.white)),
+                                          Icon(Icons.lock, size: 15, color: Colors.white),
+                                        ],
+                                      ),
+                                    ),
+                                    const PopupMenuItem<String>(
+                                      value: 'Agenda',
+                                      child: Row(
+                                        spacing: 10,
+                                        children: [
+                                          Icon(Icons.event, size: 25, color: Colors.white),
+                                          Text('Agenda', style: TextStyle(color: Colors.white)),
+                                        ],
+                                      ),
+                                    ),
+                                    const PopupMenuItem<String>(
+                                      value: 'Artisans',
+                                      child: Row(
+                                        spacing: 10,
+                                        children: [
+                                          Icon(Icons.handyman, size: 25, color: Colors.white),
+                                          Text('Artisans', style: TextStyle(color: Colors.white)),
+                                        ],
+                                      ),
+                                    ),
+
+                                    const PopupMenuItem<String>(
+                                      value: 'Annonces',
+                                      child: Row(
+                                        spacing: 10,
+                                        children: [
+                                          Icon(Icons.announcement, size: 25, color: Colors.white),
+                                          Text('Annonces', style: TextStyle(color: Colors.white)),
+                                        ],
+                                      ),
+                                    ),
                                   ],
                                 );
                                 if (!context.mounted) return;

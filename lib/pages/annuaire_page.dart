@@ -1,9 +1,14 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
+import 'package:sarrazi_asso_clean/extensions/string_extensions.dart';
 import 'package:sarrazi_asso_clean/pages/base_page.dart';
+import 'package:sarrazi_asso_clean/services/http_service.dart';
+import 'package:sarrazi_asso_clean/services/popup_service.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AnnuairePage extends StatefulWidget {
   const AnnuairePage({super.key});
@@ -16,31 +21,41 @@ class _AnnuairePageState extends State<AnnuairePage> {
   final TextEditingController _searchController = TextEditingController();
   List<dynamic> _annuaire = [];
   bool _isLoading = false;
+  String _message = "";
 
   Future<void> _searchAnnuaire(String query) async {
-    if (query.trim().isEmpty) return;
+    setState(() {
+      _isLoading = true;
+      _annuaire = [];
+      _message = "";
+    });
 
-    setState(() => _isLoading = true);
-
-    try {
-      final response = await http.get(Uri.parse('https://www.association-sarrazi.fr/recherche_annuaire.php?search=$query'));
-
-      if (response.statusCode == 200) {
-        setState(() {
-          _annuaire = json.decode(response.body);
-          _isLoading = false;
-        });
-      } else {
-        _showError('Erreur lors du chargement');
-      }
-    } catch (e) {
-      _showError('Erreur de connexion');
+    if (query.trim().isEmpty) {
+      setState(() {
+        _isLoading = false;
+      });
+      return;
     }
-  }
 
-  void _showError(String message) {
-    setState(() => _isLoading = false);
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    final response = await HttpService.rechercheAnnuaire(query);
+
+    if (response.isSuccess) {
+      setState(() {
+        _annuaire = response.data;
+        if (_annuaire.isEmpty) {
+          setState(() {
+            _message = "Aucun résultat ne correspond à votre recherche";
+          });
+        }
+      });
+    } else {
+      if (!mounted) return;
+      PopupService.showErrorMessage(context, response.data?.toString());
+    }
+
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   @override
@@ -74,9 +89,11 @@ class _AnnuairePageState extends State<AnnuairePage> {
           Expanded(
             child: _isLoading
                 ? Center(child: CircularProgressIndicator())
-                : _annuaire.isEmpty
-                ? Center(child: Text('Aucun résultat', style: GoogleFonts.poppins()))
-                : ListView.builder(itemCount: _annuaire.length, itemBuilder: (context, index) => _buildMemberCard(_annuaire[index])),
+                : _annuaire.isNotEmpty
+                ? ListView.builder(itemCount: _annuaire.length, itemBuilder: (context, index) => _buildMemberCard(_annuaire[index]))
+                : Center(
+                    child: Text(_message, style: GoogleFonts.poppins(), textAlign: TextAlign.center),
+                  ),
           ),
         ],
       ),
@@ -94,13 +111,29 @@ class _AnnuairePageState extends State<AnnuairePage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "${member['prenom']} ${member['nom']}",
+              "${member['prenom']?.toString().trim().capitalize()} ${member['nom']?.toString().trim().capitalize()}",
               style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blue[800]),
             ),
             const SizedBox(height: 8),
-            _buildInfoRow(Icons.home, "${member['rue']} - ${member['numero']}"),
-            _buildInfoRow(Icons.email, member['mail']),
-            _buildInfoRow(Icons.phone, member['portable']),
+            member['numero']?.isNotEmpty ?? false ? _buildInfoRow(Icons.home, "${member['numero']} ${member['rue']}") : _buildInfoRow(Icons.home, "${member['rue']}"),
+            member['mail']?.isNotEmpty
+                ? InkWell(
+                    child: _buildInfoRow(Icons.email, member['mail']),
+                    onTap: () async {
+                      final Email email = Email(recipients: [member['mail']], isHTML: false);
+
+                      await FlutterEmailSender.send(email);
+                    },
+                  )
+                : SizedBox.shrink(),
+            member['portable']?.isNotEmpty ?? false
+                ? InkWell(
+                    child: _buildInfoRow(Icons.phone, member['portable']),
+                    onTap: () async {
+                      await launchUrl(Uri.parse("tel:${member['portable']}"));
+                    },
+                  )
+                : SizedBox.shrink(),
           ],
         ),
       ),

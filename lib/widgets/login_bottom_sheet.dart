@@ -27,9 +27,9 @@ class _LoginBottomSheetState extends State<LoginBottomSheet> {
       errorMessage = '';
       isLoading = true;
     });
-    var response = await HttpService.authentification(email, password);
+    var response = await HttpService.verifieAuthentification(email, password);
     setState(() => isLoading = false);
-    if (response?.result ?? false) {
+    if (response?.isSuccess ?? false) {
       if (!mounted) return;
       Navigator.pop(context, true);
     } else {

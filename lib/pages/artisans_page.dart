@@ -1,8 +1,7 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:sarrazi_asso_clean/pages/base_page.dart';
+import 'package:sarrazi_asso_clean/services/http_service.dart';
+import 'package:sarrazi_asso_clean/services/popup_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ArtisansPage extends StatefulWidget {
@@ -19,27 +18,27 @@ class _ArtisansPageState extends State<ArtisansPage> {
   @override
   void initState() {
     super.initState();
-    fetchArtisans();
+    chargerArtisans();
   }
 
-  Future<void> fetchArtisans() async {
-    try {
-      final response = await http.get(Uri.parse('https://www.association-sarrazi.fr/liste_artisans.php'));
+  Future<void> chargerArtisans() async {
+    setState(() {
+      isLoading = true;
+    });
 
-      if (response.statusCode == 200) {
-        setState(() {
-          artisans = json.decode(response.body);
-          isLoading = false;
-        });
-      } else {
-        throw Exception('Erreur serveur');
-      }
-    } catch (e) {
-      print('Erreur : $e');
+    final response = await HttpService.chargerArtisans();
+    if (response.isSuccess) {
       setState(() {
-        isLoading = false;
+        artisans = response.data;
       });
+    } else {
+      if (!mounted) return;
+      PopupService.showErrorMessage(context, response.data?.toString());
     }
+
+    setState(() {
+      isLoading = false;
+    });
   }
 
   Future<void> _launchURL(String url) async {

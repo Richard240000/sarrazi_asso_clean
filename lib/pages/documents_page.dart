@@ -2,10 +2,13 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sarrazi_asso_clean/pages/base_page.dart';
 import 'package:http/http.dart' as http;
+import 'package:sarrazi_asso_clean/services/http_service.dart';
+import 'package:sarrazi_asso_clean/services/popup_service.dart';
 import 'package:share_plus/share_plus.dart';
 
 class DocumentsPage extends StatefulWidget {
@@ -22,54 +25,64 @@ class _DocumentsPageState extends State<DocumentsPage> {
   @override
   void initState() {
     super.initState();
-    fetchDocuments();
+    chargerDocuments();
   }
 
-  Future<void> fetchDocuments() async {
-    try {
-      final response = await http.get(Uri.parse('https://www.association-sarrazi.fr/get_documents.php'));
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        setState(() {
-          documents = data;
-          isLoading = false;
-        });
-      } else {
-        throw Exception("Erreur de chargement");
-      }
-    } catch (e) {
-      print('Erreur chargement : $e');
+  Future<void> chargerDocuments() async {
+    setState(() {
+      isLoading = true;
+    });
+    final response = await HttpService.chargerDocuments();
+    if (response.isSuccess) {
       setState(() {
+        documents = response.data;
         isLoading = false;
       });
+    } else {
+      if (!mounted) return;
+      PopupService.showErrorMessage(context, response.data?.toString());
     }
+
+    setState(() {
+      isLoading = false;
+    });
   }
 
   Future<void> downloadAndShare(String url, String fileName) async {
     try {
+      setState(() {
+        isLoading = true;
+      });
+
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
         Directory dir;
         if (Platform.isAndroid) {
           dir = (await getExternalStorageDirectory())!;
-        } else if (Platform.isIOS) {
-          dir = await getApplicationDocumentsDirectory();
         } else {
-          throw UnsupportedError("Plateforme non supportée");
+          dir = await getApplicationDocumentsDirectory();
         }
-
         final filePath = '${dir.path}/$fileName';
         final file = File(filePath);
         await file.writeAsBytes(response.bodyBytes);
 
+        setState(() {
+          isLoading = false;
+        });
+
         // Ouvre et propose le partage
-        await OpenFile.open(filePath);
-        await Share.shareXFiles([XFile(filePath)], text: 'Voici le document PDF');
+        await SharePlus.instance.share(ShareParams(text: 'Voici le document PDF', files: [XFile(filePath)]));
       } else {
-        print('Erreur téléchargement : ${response.statusCode}');
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur de chargement')));
       }
     } catch (e) {
-      print('Erreur téléchargement : $e');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur de chargement')));
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 
@@ -93,7 +106,7 @@ class _DocumentsPageState extends State<DocumentsPage> {
                 child: ListTile(
                   leading: const Icon(Icons.picture_as_pdf, color: Colors.redAccent),
                   title: Text(doc['titre'], style: const TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Text('Mis en ligne : ${doc['date_mise_en_ligne']}'),
+                  subtitle: Text('Mis en ligne : ${DateFormat("dd/MM/yyyy HH:mm").format(DateTime.parse(doc['date_mise_en_ligne']))}'),
                   trailing: IconButton(icon: const Icon(Icons.download), onPressed: () => downloadAndShare(doc['url'], '${doc['titre']}.pdf')),
                 ),
               );

@@ -59,12 +59,26 @@ class _AccueilPageState extends State<AccueilPage> {
                 label: 'Documents',
                 icon: Icons.picture_as_pdf,
                 color: Color(0xFF00695C),
-                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => DocumentsPage())),
+                isSecure: true,
+                onTap: () async {
+                  if (sharedPreferences.getString('nom')?.isEmpty ?? true) {
+                    await showModalBottomSheet(context: context, builder: (context) => LoginBottomSheet(), isScrollControlled: true);
+                    setState(() {
+                      utilisateur = sharedPreferences.getString('nom');
+                    });
+                  }
+
+                  if (sharedPreferences.getString('nom')?.isNotEmpty ?? false) {
+                    if (!mounted) return;
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => DocumentsPage()));
+                  }
+                },
               ),
               _buildTile(
                 label: 'Annuaire',
                 icon: Icons.contact_phone,
                 color: Color(0xFF4527A0),
+                isSecure: true,
                 onTap: () async {
                   if (sharedPreferences.getString('nom')?.isEmpty ?? true) {
                     await showModalBottomSheet(context: context, builder: (context) => LoginBottomSheet(), isScrollControlled: true);
@@ -110,7 +124,7 @@ class _AccueilPageState extends State<AccueilPage> {
     );
   }
 
-  Widget _buildTile({required String label, required IconData icon, required Color color, required VoidCallback onTap}) {
+  Widget _buildTile({required String label, required IconData icon, required Color color, required VoidCallback onTap, bool isSecure = false}) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -121,14 +135,25 @@ class _AccueilPageState extends State<AccueilPage> {
         ),
         padding: const EdgeInsets.all(12.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Icon(icon, size: 32.0, color: Colors.white),
-            const SizedBox(height: 10.0),
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 13.5, color: Colors.white),
+            isSecure
+                ? Align(
+                    alignment: AlignmentGeometry.topRight,
+                    child: Icon(Icons.lock, size: 16.0, color: Colors.white),
+                  )
+                : SizedBox(height: 16),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, size: 32.0, color: Colors.white),
+                const SizedBox(height: 10.0),
+                Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 13.5, color: Colors.white),
+                ),
+              ],
             ),
           ],
         ),

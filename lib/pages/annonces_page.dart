@@ -1,10 +1,10 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:sarrazi_asso_clean/main.dart';
 import 'package:sarrazi_asso_clean/pages/ajouter_annonce_page.dart';
 import 'package:sarrazi_asso_clean/pages/base_page.dart';
+import 'package:sarrazi_asso_clean/services/http_service.dart';
+import 'package:sarrazi_asso_clean/services/popup_service.dart';
 
 import 'package:sarrazi_asso_clean/widgets/login_bottom_sheet.dart';
 
@@ -27,17 +27,19 @@ class _AnnoncesPagesState extends State<AnnoncesPages> {
   }
 
   Future<void> chargerAnnonces() async {
-    final response = await http.get(Uri.parse('https://www.association-sarrazi.fr/liste_annonces.php'));
-
-    if (response.statusCode == 200) {
+    setState(() {
+      loading = true;
+    });
+    final response = await HttpService.chargerAnnonces();
+    if (response.isSuccess) {
       setState(() {
-        annonces = jsonDecode(response.body);
-        loading = false;
+        annonces = response.data;
       });
     } else {
-      setState(() => loading = false);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur de chargement')));
+      if (!mounted) return;
+      PopupService.showErrorMessage(context, response.data?.toString());
     }
+    setState(() => loading = false);
   }
 
   @override

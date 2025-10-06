@@ -1,8 +1,7 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:sarrazi_asso_clean/pages/base_page.dart';
-import 'package:http/http.dart' as http;
+import 'package:sarrazi_asso_clean/services/http_service.dart';
+import 'package:sarrazi_asso_clean/services/popup_service.dart';
 
 class AgendaPage extends StatefulWidget {
   const AgendaPage({super.key});
@@ -18,30 +17,24 @@ class _AgendaPageState extends State<AgendaPage> {
   @override
   void initState() {
     super.initState();
-    fetchEvenements();
+    chargerAgenda();
   }
 
-  Future<void> fetchEvenements() async {
-    try {
-      final response = await http.get(Uri.parse('https://www.association-sarrazi.fr/get_evenements.php'));
+  Future<void> chargerAgenda() async {
+    final response = await HttpService.chargerAgenda();
 
-      if (response.statusCode == 200) {
-        print("Réponse serveur : ${response.body}");
-        setState(() {
-          evenements = json.decode(response.body);
-          isLoading = false;
-        });
-      } else {
-        throw Exception('Erreur de chargement');
-      }
-    } catch (e) {
+    if (response.isSuccess) {
       setState(() {
-        isLoading = false;
-        evenements = [];
+        evenements = response.data;
       });
-      print('Erreur attrapée : $e');
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur lors du chargement des événements'), backgroundColor: Colors.red));
+    } else {
+      if (!mounted) return;
+      PopupService.showErrorMessage(context, response.data?.toString());
     }
+
+    setState(() {
+      isLoading = false;
+    });
   }
 
   @override

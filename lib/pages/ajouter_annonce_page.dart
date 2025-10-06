@@ -31,37 +31,35 @@ class _AjouterAnnoncePageState extends State<AjouterAnnoncePage> {
 
     setState(() => loading = true);
 
-    try {
-      var uri = Uri.parse("https://www.association-sarrazi.fr/ajouter_annonce.php");
-      var request = http.MultipartRequest('POST', uri);
+    var uri = Uri.parse("https://www.association-sarrazi.fr/ajouter_annonce.php");
+    var request = http.MultipartRequest('POST', uri);
 
-      request.fields.addAll({
-        'titre': titreController.text,
-        'description': descriptionController.text,
-        'categorie': categorieController.text,
-        'auteur_nom': nom!,
-        'auteur_email': email!,
-        'visible': '1',
-      });
+    request.fields.addAll({
+      'titre': titreController.text,
+      'description': descriptionController.text,
+      'categorie': categorieController.text,
+      'auteur_nom': nom!,
+      'auteur_email': email!,
+      'visible': '1',
+    });
 
-      if (_image != null) {
-        final mimeType = lookupMimeType(_image!.path) ?? 'image/jpeg';
-        request.files.add(await http.MultipartFile.fromPath('photo', _image!.path, contentType: MediaType.parse(mimeType)));
-      }
-
-      final response = await request.send();
-      final respStr = await response.stream.bytesToString();
-
-      if (respStr.contains('success')) {
-        Navigator.pop(context, true);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Erreur lors de l'envoi")));
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur de connexion')));
-    } finally {
-      setState(() => loading = false);
+    if (_image != null) {
+      final mimeType = lookupMimeType(_image!.path) ?? 'image/jpeg';
+      request.files.add(await http.MultipartFile.fromPath('photo', _image!.path, contentType: MediaType.parse(mimeType)));
     }
+
+    final response = await request.send();
+    final respStr = await response.stream.bytesToString();
+
+    if (!mounted) return;
+    if (respStr.contains('success')) {
+      Navigator.pop(context, true);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Erreur lors de l'envoi")));
+      //PopupService.showErrorMessage(context, response.data?.toString());
+    }
+
+    setState(() => loading = false);
   }
 
   @override
