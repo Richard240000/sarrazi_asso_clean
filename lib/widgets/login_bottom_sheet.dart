@@ -14,8 +14,8 @@ class LoginBottomSheet extends StatefulWidget {
 
 class _LoginBottomSheetState extends State<LoginBottomSheet> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController emailController = TextEditingController(text: "carolelucas@lilo.org");
-  final TextEditingController passwordController = TextEditingController(text: "Zebra88");
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
   bool isLoading = false;
   String? errorMessage;
 
