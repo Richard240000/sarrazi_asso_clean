@@ -7,6 +7,7 @@ plugins {
     id("com.google.gms.google-services")
 }
 
+
 android {
     namespace = "fr.sarrazi.asso"
     compileSdk = flutter.compileSdkVersion
@@ -23,8 +24,8 @@ android {
     // ---- Gestion robuste des versions ----
     // Essaie d'abord les propriétés passées par Flutter (nouvelles et anciennes),
     // puis les variables d'environnement (Android Studio), sinon valeurs de repli sûres.
-    val fallbackVersionCode = "1008"   // <-- tu peux mettre la valeur que tu veux publier maintenant
-    val fallbackVersionName = "1.0.1"
+    val fallbackVersionCode = "1012"   // <-- tu peux mettre la valeur que tu veux publier maintenant
+    val fallbackVersionName = "1.1.1"
 
     val flutterVersionCodeStr =
         (project.findProperty("flutter.versionCode")?.toString()

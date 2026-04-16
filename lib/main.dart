@@ -21,10 +21,25 @@ void main() async {
   // 🔔 Notifications locales
   const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
 
-  const InitializationSettings initializationSettings = InitializationSettings(android: initializationSettingsAndroid);
+  const InitializationSettings initializationSettings = InitializationSettings(android: initializationSettingsAndroid, iOS: DarwinInitializationSettings());
 
   await flutterLocalNotificationsPlugin.initialize(initializationSettings);
 
+  await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+    alert: true, // Required to display a heads up notification
+    badge: true,
+    sound: true,
+  );
+
+  // You may set the permission requests to "provisional" which allows the user to choose what type
+  // of notifications they would like to receive once the user receives a notification.
+  final notificationSettings = await FirebaseMessaging.instance.requestPermission(provisional: true);
+
+  // For apple platforms, make sure the APNS token is available before making any FCM plugin API calls
+  final apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+  if (apnsToken != null) {
+    // APNS token is available, make FCM plugin API requests...
+  }
   // 📬 Abonnement au topic 'all'
   await FirebaseMessaging.instance.subscribeToTopic('all');
   print("[DEBUG] ✅ Abonné au topic 'all'");

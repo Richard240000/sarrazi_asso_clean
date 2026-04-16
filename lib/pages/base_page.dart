@@ -8,20 +8,33 @@ import 'package:sarrazi_asso_clean/pages/annuaire_page.dart';
 import 'package:sarrazi_asso_clean/pages/artisans_page.dart';
 import 'package:sarrazi_asso_clean/pages/documents_page.dart';
 import 'package:sarrazi_asso_clean/widgets/login_bottom_sheet.dart';
+import 'package:sarrazi_asso_clean/pages/association_page.dart';
 
 class BasePage extends StatefulWidget {
-  const BasePage({super.key, required this.title, required this.body, this.isHome = false, this.floatingButton, this.isBottomBarVisible = true});
+  const BasePage({
+    super.key,
+    required this.title,
+    required this.body,
+    this.isHome = false,
+    this.floatingButton,
+    this.isBottomBarVisible = true,
+  });
+
   final String title;
   final Widget body;
   final Widget? floatingButton;
   final bool isHome;
   final bool isBottomBarVisible;
+
   @override
   State<BasePage> createState() => _BasePageState();
 }
 
 class _BasePageState extends State<BasePage> {
   String? utilisateur;
+
+  // ✅ Ancre le menu burger au bouton (évite le positionnement "1000,1000")
+  final GlobalKey _menuKey = GlobalKey();
 
   @override
   void initState() {
@@ -81,7 +94,10 @@ class _BasePageState extends State<BasePage> {
                               icon: Column(
                                 children: [
                                   Icon(Icons.home, color: widget.isHome ? Colors.blue[800] : Color(0xff424242)),
-                                  Text("Accueil", style: TextStyle(color: widget.isHome ? Colors.blue[800] : Color(0xff424242))),
+                                  Text(
+                                    "Accueil",
+                                    style: TextStyle(color: widget.isHome ? Colors.blue[800] : Color(0xff424242)),
+                                  ),
                                 ],
                               ),
                               label: const Text(""),
@@ -89,12 +105,35 @@ class _BasePageState extends State<BasePage> {
                           ),
                           Expanded(
                             child: TextButton.icon(
+                              key: _menuKey,
                               onPressed: () async {
+                                // ✅ Calcule la position réelle du bouton pour afficher le menu au bon endroit
+                                final RenderBox button = _menuKey.currentContext!.findRenderObject() as RenderBox;
+                                final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+
+                                final RelativeRect position = RelativeRect.fromRect(
+                                  Rect.fromPoints(
+                                    button.localToGlobal(Offset.zero, ancestor: overlay),
+                                    button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),
+                                  ),
+                                  Offset.zero & overlay.size,
+                                );
+
                                 final result = await showMenu(
                                   context: context,
                                   color: Colors.blue[800],
-                                  position: RelativeRect.fromLTRB(1000.0, 1000.0, 0.0, 0.0),
+                                  position: position,
                                   items: <PopupMenuItem<String>>[
+                                    const PopupMenuItem<String>(
+                                      value: 'Association',
+                                      child: Row(
+                                        spacing: 10,
+                                        children: [
+                                          Icon(Icons.groups, size: 25, color: Colors.white),
+                                          Text('L\'association', style: TextStyle(color: Colors.white)),
+                                        ],
+                                      ),
+                                    ),
                                     const PopupMenuItem<String>(
                                       value: 'Alerte-Info',
                                       child: Row(
@@ -147,7 +186,7 @@ class _BasePageState extends State<BasePage> {
                                         ],
                                       ),
                                     ),
-
+                                   
                                     const PopupMenuItem<String>(
                                       value: 'Annonces',
                                       child: Row(
@@ -160,17 +199,42 @@ class _BasePageState extends State<BasePage> {
                                     ),
                                   ],
                                 );
+
                                 if (!context.mounted) return;
+                                if (result == null) return;
+
                                 switch (result) {
                                   case "Alerte-Info":
                                     Navigator.push(context, MaterialPageRoute(builder: (context) => AlertesInfoPage()));
                                     break;
+
                                   case "Documents":
-                                    Navigator.push(context, MaterialPageRoute(builder: (context) => DocumentsPage()));
+                                    if (utilisateur?.isEmpty ?? true) {
+                                      await showModalBottomSheet(
+                                        context: context,
+                                        builder: (context) => LoginBottomSheet(),
+                                        isScrollControlled: true,
+                                      );
+                                      setState(() {
+                                        utilisateur = sharedPreferences.getString('nom');
+                                      });
+                                    }
+                                    if (utilisateur?.isNotEmpty ?? false) {
+                                      if (!context.mounted) return;
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(builder: (context) => DocumentsPage()),
+                                      );
+                                    }
                                     break;
+
                                   case "Annuaire":
                                     if (utilisateur?.isEmpty ?? true) {
-                                      await showModalBottomSheet(context: context, builder: (context) => LoginBottomSheet(), isScrollControlled: true);
+                                      await showModalBottomSheet(
+                                        context: context,
+                                        builder: (context) => LoginBottomSheet(),
+                                        isScrollControlled: true,
+                                      );
                                       setState(() {
                                         utilisateur = sharedPreferences.getString('nom');
                                       });
@@ -180,12 +244,22 @@ class _BasePageState extends State<BasePage> {
                                       Navigator.push(context, MaterialPageRoute(builder: (context) => AnnuairePage()));
                                     }
                                     break;
+
                                   case "Artisans":
                                     Navigator.push(context, MaterialPageRoute(builder: (context) => ArtisansPage()));
                                     break;
+
+                                  case "Association":
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => const AssociationPage()),
+                                    );
+                                    break;
+
                                   case "Agenda":
                                     Navigator.push(context, MaterialPageRoute(builder: (context) => AgendaPage()));
                                     break;
+
                                   case "Annonces":
                                     Navigator.push(context, MaterialPageRoute(builder: (context) => AnnoncesPages()));
                                     break;

@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:sarrazi_asso_clean/main.dart';
 import 'package:sarrazi_asso_clean/services/http_service.dart';
+import 'package:sarrazi_asso_clean/pages/forgot_password_page.dart';
 
 class LoginBottomSheet extends StatefulWidget {
   const LoginBottomSheet({super.key});
@@ -14,21 +14,29 @@ class LoginBottomSheet extends StatefulWidget {
 
 class _LoginBottomSheetState extends State<LoginBottomSheet> {
   final _formKey = GlobalKey<FormState>();
+
+  // Champs VIDE (pas de valeurs par défaut)
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+
   bool isLoading = false;
   String? errorMessage;
 
   Future seConnecter() async {
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
+
     if (!_formKey.currentState!.validate()) return;
+
     setState(() {
       errorMessage = '';
       isLoading = true;
     });
+
     var response = await HttpService.verifieAuthentification(email, password);
+
     setState(() => isLoading = false);
+
     if (response?.isSuccess ?? false) {
       if (!mounted) return;
       Navigator.pop(context, true);
@@ -67,6 +75,8 @@ class _LoginBottomSheetState extends State<LoginBottomSheet> {
                               textAlign: TextAlign.center,
                               style: TextStyle(color: Colors.white, fontSize: 18),
                             ),
+
+                            // Champ EMAIL
                             TextFormField(
                               controller: emailController,
                               decoration: InputDecoration(
@@ -79,13 +89,17 @@ class _LoginBottomSheetState extends State<LoginBottomSheet> {
                                 if (value == null || value.isEmpty) {
                                   return 'Champ obligatoire';
                                 }
-                                final bool emailValid = RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(value);
+                                final bool emailValid = RegExp(
+                                  r"^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$",
+                                ).hasMatch(value);
                                 if (!emailValid) {
                                   return 'Format incorrect';
                                 }
                                 return null;
                               },
                             ),
+
+                            // Champ MOT DE PASSE
                             TextFormField(
                               controller: passwordController,
                               obscureText: true,
@@ -101,21 +115,27 @@ class _LoginBottomSheetState extends State<LoginBottomSheet> {
                                 return null;
                               },
                             ),
-                            // Padding(
-                            //   padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
-                            //   child: Text(
-                            //     "Mot de passe oublié ?",
-                            //     textAlign: TextAlign.start,
-                            //     style: TextStyle(
-                            //       color: Colors.transparent,
-                            //       fontStyle: FontStyle.italic,
-                            //       decoration: TextDecoration.underline,
-                            //       decorationColor: Colors.white,
-                            //       decorationThickness: 2,
-                            //       shadows: [Shadow(color: Colors.white, offset: Offset(0, -5))],
-                            //     ),
-                            //   ),
-                            // ),
+
+                            // 🔥🔥🔥 BOUTON "Mot de passe oublié ?"
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: TextButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => const ForgotPasswordPage(),
+                                    ),
+                                  );
+                                },
+                                child: const Text(
+                                  "Mot de passe oublié ?",
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ),
+                            ),
+
+                            // Boutons
                             Row(
                               spacing: 15,
                               children: [
@@ -123,8 +143,14 @@ class _LoginBottomSheetState extends State<LoginBottomSheet> {
                                   child: OutlinedButton(
                                     style: ButtonStyle(
                                       padding: WidgetStatePropertyAll(EdgeInsets.all(15)),
-                                      shape: WidgetStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-                                      side: WidgetStateProperty.all(BorderSide(color: Colors.white, width: 1.0, style: BorderStyle.solid)),
+                                      shape: WidgetStateProperty.all(
+                                        RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(10),
+                                        ),
+                                      ),
+                                      side: WidgetStateProperty.all(
+                                        BorderSide(color: Colors.white, width: 1.0),
+                                      ),
                                     ),
                                     onPressed: () {
                                       Navigator.pop(context);
@@ -137,9 +163,22 @@ class _LoginBottomSheetState extends State<LoginBottomSheet> {
                                     onPressed: isLoading ? null : () async => await seConnecter(),
                                     style: ButtonStyle(
                                       padding: WidgetStatePropertyAll(EdgeInsets.all(15)),
-                                      shape: WidgetStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                                      shape: WidgetStateProperty.all(
+                                        RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(10),
+                                        ),
+                                      ),
                                     ),
-                                    child: isLoading ? SizedBox(height: 24, width: 24, child: CircularProgressIndicator(strokeWidth: 3, color: Colors.white)) : Text("Se connecter"),
+                                    child: isLoading
+                                        ? SizedBox(
+                                      height: 24,
+                                      width: 24,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 3,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                        : Text("Se connecter"),
                                   ),
                                 ),
                               ],
@@ -149,18 +188,20 @@ class _LoginBottomSheetState extends State<LoginBottomSheet> {
                       ),
                     ),
                   ),
+
+                  // Message d’erreur
                   errorMessage?.isNotEmpty ?? false
                       ? Container(
-                          color: Colors.red,
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              errorMessage ?? '',
-                              style: TextStyle(color: Colors.white),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        )
+                    color: Colors.red,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        errorMessage ?? '',
+                        style: TextStyle(color: Colors.white),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  )
                       : SizedBox.shrink(),
                 ],
               ),
