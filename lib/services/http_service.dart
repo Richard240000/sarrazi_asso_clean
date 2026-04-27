@@ -7,27 +7,72 @@ import 'package:sarrazi_asso_clean/main.dart';
 class HttpService {
   static String baseUrl = "https://www.association-sarrazi.fr";
   static String authentification = "verifier_login.php";
+  static Future<Tuple> checkAppVersion(String currentVersion) async {
+    try {
+      var route = "$baseUrl/check_version.php";
 
-  static Future<Tuple> verifieAuthentification(String email, String password) async {
+      log("**************************************************************");
+      log("CHECK VERSION => $route");
+
+      final bool isConnected = await InternetConnection().hasInternetAccess;
+      if (!isConnected) {
+        return Tuple(false, "Pas de connexion internet");
+      }
+
+      final response = await http.get(
+        Uri.parse("$route?version=$currentVersion"),
+      );
+      log("[${response.statusCode}] ${response.body}");
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        return Tuple(true, data);
+      } else {
+        return Tuple(false, "Erreur serveur");
+      }
+    } catch (e) {
+      return Tuple(false, "Erreur technique");
+    }
+  }
+
+  static Future<Tuple> verifieAuthentification(
+    String email,
+    String password,
+  ) async {
     try {
       var route = "$baseUrl/verifier_login.php";
       log("**************************************************************");
       log(route);
-      var body = jsonEncode({'email': email.trim(), 'password': password.trim()});
+      var body = jsonEncode({
+        'email': email.trim(),
+        'password': password.trim(),
+      });
 
       // Vérifie la connexion internet
       final bool isConnected = await InternetConnection().hasInternetAccess;
       if (!isConnected) {
         log("=> pas de connexion internet");
-        return Tuple(false, "Problème réseau.\nVeuillez vérifier votre connexion internet.");
+        return Tuple(
+          false,
+          "Problème réseau.\nVeuillez vérifier votre connexion internet.",
+        );
       }
 
-      final response = await http.post(Uri.parse(route), headers: {'Content-Type': 'application/json'}, body: body);
+      final response = await http.post(
+        Uri.parse(route),
+        headers: {'Content-Type': 'application/json'},
+        body: body,
+      );
       log("[${response.statusCode}] ${response.body}");
       final data = jsonDecode(response.body);
       if (data['status'] == 'success') {
         await sharedPreferences.setString('email', data['email']);
         await sharedPreferences.setString('nom', data['nom']);
+        await sharedPreferences.setInt(
+          'user_id',
+          int.parse(data['id'].toString()),
+        );
         return Tuple(true, null);
       } else {
         log(data['message']);
@@ -58,6 +103,10 @@ class HttpService {
     return await get("news.php");
   }
 
+  static Future<Tuple> chargerBandeauMaj() async {
+    return await get("update_banner.php");
+  }
+
   static Future<Tuple> chargerArtisans() async {
     return await get("liste_artisans.php");
   }
@@ -76,7 +125,10 @@ class HttpService {
       final bool isConnected = await InternetConnection().hasInternetAccess;
       if (!isConnected) {
         log("=> pas de connexion internet");
-        return Tuple(false, "Problème réseau.\nVeuillez vérifier votre connexion internet.");
+        return Tuple(
+          false,
+          "Problème réseau.\nVeuillez vérifier votre connexion internet.",
+        );
       }
 
       // Si internet OK, envoi de la requête au serveur

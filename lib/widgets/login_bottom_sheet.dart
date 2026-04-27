@@ -1,7 +1,4 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:sarrazi_asso_clean/services/http_service.dart';
 import 'package:sarrazi_asso_clean/pages/forgot_password_page.dart';
 
@@ -89,9 +86,7 @@ class _LoginBottomSheetState extends State<LoginBottomSheet> {
                                 if (value == null || value.isEmpty) {
                                   return 'Champ obligatoire';
                                 }
-                                final bool emailValid = RegExp(
-                                  r"^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$",
-                                ).hasMatch(value);
+                                final bool emailValid = RegExp(r"^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$").hasMatch(value);
                                 if (!emailValid) {
                                   return 'Format incorrect';
                                 }
@@ -121,17 +116,9 @@ class _LoginBottomSheetState extends State<LoginBottomSheet> {
                               alignment: Alignment.centerRight,
                               child: TextButton(
                                 onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => const ForgotPasswordPage(),
-                                    ),
-                                  );
+                                  Navigator.push(context, MaterialPageRoute(builder: (_) => const ForgotPasswordPage()));
                                 },
-                                child: const Text(
-                                  "Mot de passe oublié ?",
-                                  style: TextStyle(color: Colors.white),
-                                ),
+                                child: const Text("Mot de passe oublié ?", style: TextStyle(color: Colors.white)),
                               ),
                             ),
 
@@ -143,14 +130,8 @@ class _LoginBottomSheetState extends State<LoginBottomSheet> {
                                   child: OutlinedButton(
                                     style: ButtonStyle(
                                       padding: WidgetStatePropertyAll(EdgeInsets.all(15)),
-                                      shape: WidgetStateProperty.all(
-                                        RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(10),
-                                        ),
-                                      ),
-                                      side: WidgetStateProperty.all(
-                                        BorderSide(color: Colors.white, width: 1.0),
-                                      ),
+                                      shape: WidgetStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                                      side: WidgetStateProperty.all(BorderSide(color: Colors.white, width: 1.0)),
                                     ),
                                     onPressed: () {
                                       Navigator.pop(context);
@@ -163,22 +144,9 @@ class _LoginBottomSheetState extends State<LoginBottomSheet> {
                                     onPressed: isLoading ? null : () async => await seConnecter(),
                                     style: ButtonStyle(
                                       padding: WidgetStatePropertyAll(EdgeInsets.all(15)),
-                                      shape: WidgetStateProperty.all(
-                                        RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(10),
-                                        ),
-                                      ),
+                                      shape: WidgetStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
                                     ),
-                                    child: isLoading
-                                        ? SizedBox(
-                                      height: 24,
-                                      width: 24,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 3,
-                                        color: Colors.white,
-                                      ),
-                                    )
-                                        : Text("Se connecter"),
+                                    child: isLoading ? SizedBox(height: 24, width: 24, child: CircularProgressIndicator(strokeWidth: 3, color: Colors.white)) : Text("Se connecter"),
                                   ),
                                 ),
                               ],
@@ -192,16 +160,16 @@ class _LoginBottomSheetState extends State<LoginBottomSheet> {
                   // Message d’erreur
                   errorMessage?.isNotEmpty ?? false
                       ? Container(
-                    color: Colors.red,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        errorMessage ?? '',
-                        style: TextStyle(color: Colors.white),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  )
+                          color: Colors.red,
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              errorMessage ?? '',
+                              style: TextStyle(color: Colors.white),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        )
                       : SizedBox.shrink(),
                 ],
               ),

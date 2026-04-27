@@ -2,23 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:focus_detector_v2/focus_detector_v2.dart';
 import 'package:sarrazi_asso_clean/main.dart';
 import 'package:sarrazi_asso_clean/pages/agenda_page.dart';
-import 'package:sarrazi_asso_clean/pages/alertes_info_page.dart';
 import 'package:sarrazi_asso_clean/pages/annonces_page.dart';
 import 'package:sarrazi_asso_clean/pages/annuaire_page.dart';
 import 'package:sarrazi_asso_clean/pages/artisans_page.dart';
 import 'package:sarrazi_asso_clean/pages/documents_page.dart';
 import 'package:sarrazi_asso_clean/widgets/login_bottom_sheet.dart';
 import 'package:sarrazi_asso_clean/pages/association_page.dart';
+import 'package:sarrazi_asso_clean/pages/alerte_signalement.dart';
 
 class BasePage extends StatefulWidget {
-  const BasePage({
-    super.key,
-    required this.title,
-    required this.body,
-    this.isHome = false,
-    this.floatingButton,
-    this.isBottomBarVisible = true,
-  });
+  const BasePage({super.key, required this.title, required this.body, this.isHome = false, this.floatingButton, this.isBottomBarVisible = true});
 
   final String title;
   final Widget body;
@@ -33,13 +26,7 @@ class BasePage extends StatefulWidget {
 class _BasePageState extends State<BasePage> {
   String? utilisateur;
 
-  // ✅ Ancre le menu burger au bouton (évite le positionnement "1000,1000")
   final GlobalKey _menuKey = GlobalKey();
-
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +47,7 @@ class _BasePageState extends State<BasePage> {
               utilisateur?.isNotEmpty ?? false
                   ? IconButton(
                       onPressed: () async {
-                        await sharedPreferences.setString("nom", '');
+                        await sharedPreferences.clear();
                         setState(() {
                           utilisateur = sharedPreferences.getString('nom');
                         });
@@ -69,9 +56,9 @@ class _BasePageState extends State<BasePage> {
                           Navigator.popUntil(context, (x) => x.isFirst);
                         }
                       },
-                      icon: Icon(Icons.power_settings_new),
+                      icon: const Icon(Icons.power_settings_new),
                     )
-                  : SizedBox.shrink(),
+                  : const SizedBox.shrink(),
             ],
           ),
           body: widget.body,
@@ -80,7 +67,7 @@ class _BasePageState extends State<BasePage> {
               ? Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Divider(height: 1),
+                    const Divider(height: 1),
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       child: Row(
@@ -93,11 +80,8 @@ class _BasePageState extends State<BasePage> {
                               },
                               icon: Column(
                                 children: [
-                                  Icon(Icons.home, color: widget.isHome ? Colors.blue[800] : Color(0xff424242)),
-                                  Text(
-                                    "Accueil",
-                                    style: TextStyle(color: widget.isHome ? Colors.blue[800] : Color(0xff424242)),
-                                  ),
+                                  Icon(Icons.home, color: widget.isHome ? Colors.blue[800] : const Color(0xff424242)),
+                                  Text("Accueil", style: TextStyle(color: widget.isHome ? Colors.blue[800] : const Color(0xff424242))),
                                 ],
                               ),
                               label: const Text(""),
@@ -107,15 +91,11 @@ class _BasePageState extends State<BasePage> {
                             child: TextButton.icon(
                               key: _menuKey,
                               onPressed: () async {
-                                // ✅ Calcule la position réelle du bouton pour afficher le menu au bon endroit
                                 final RenderBox button = _menuKey.currentContext!.findRenderObject() as RenderBox;
                                 final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
 
                                 final RelativeRect position = RelativeRect.fromRect(
-                                  Rect.fromPoints(
-                                    button.localToGlobal(Offset.zero, ancestor: overlay),
-                                    button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),
-                                  ),
+                                  Rect.fromPoints(button.localToGlobal(Offset.zero, ancestor: overlay), button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay)),
                                   Offset.zero & overlay.size,
                                 );
 
@@ -135,12 +115,12 @@ class _BasePageState extends State<BasePage> {
                                       ),
                                     ),
                                     const PopupMenuItem<String>(
-                                      value: 'Alerte-Info',
+                                      value: 'Alerte-Signalement',
                                       child: Row(
                                         spacing: 10,
                                         children: [
-                                          Icon(Icons.campaign, size: 25, color: Colors.white),
-                                          Text('Alerte-Info', style: TextStyle(color: Colors.white)),
+                                          Icon(Icons.notifications_active, size: 25, color: Colors.white),
+                                          Text('Alertes & Signalements', style: TextStyle(color: Colors.white)),
                                         ],
                                       ),
                                     ),
@@ -186,7 +166,6 @@ class _BasePageState extends State<BasePage> {
                                         ],
                                       ),
                                     ),
-                                   
                                     const PopupMenuItem<String>(
                                       value: 'Annonces',
                                       child: Row(
@@ -204,37 +183,26 @@ class _BasePageState extends State<BasePage> {
                                 if (result == null) return;
 
                                 switch (result) {
-                                  case "Alerte-Info":
-                                    Navigator.push(context, MaterialPageRoute(builder: (context) => AlertesInfoPage()));
+                                  case "Alerte-Signalement":
+                                    Navigator.push(context, MaterialPageRoute(builder: (context) => const AlerteSignalementPage()));
                                     break;
 
                                   case "Documents":
                                     if (utilisateur?.isEmpty ?? true) {
-                                      await showModalBottomSheet(
-                                        context: context,
-                                        builder: (context) => LoginBottomSheet(),
-                                        isScrollControlled: true,
-                                      );
+                                      await showModalBottomSheet(context: context, builder: (context) => LoginBottomSheet(), isScrollControlled: true);
                                       setState(() {
                                         utilisateur = sharedPreferences.getString('nom');
                                       });
                                     }
                                     if (utilisateur?.isNotEmpty ?? false) {
                                       if (!context.mounted) return;
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(builder: (context) => DocumentsPage()),
-                                      );
+                                      Navigator.push(context, MaterialPageRoute(builder: (context) => DocumentsPage()));
                                     }
                                     break;
 
                                   case "Annuaire":
                                     if (utilisateur?.isEmpty ?? true) {
-                                      await showModalBottomSheet(
-                                        context: context,
-                                        builder: (context) => LoginBottomSheet(),
-                                        isScrollControlled: true,
-                                      );
+                                      await showModalBottomSheet(context: context, builder: (context) => LoginBottomSheet(), isScrollControlled: true);
                                       setState(() {
                                         utilisateur = sharedPreferences.getString('nom');
                                       });
@@ -250,10 +218,7 @@ class _BasePageState extends State<BasePage> {
                                     break;
 
                                   case "Association":
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(builder: (context) => const AssociationPage()),
-                                    );
+                                    Navigator.push(context, MaterialPageRoute(builder: (context) => const AssociationPage()));
                                     break;
 
                                   case "Agenda":
@@ -265,7 +230,7 @@ class _BasePageState extends State<BasePage> {
                                     break;
                                 }
                               },
-                              icon: Column(
+                              icon: const Column(
                                 children: [
                                   Icon(Icons.menu, color: Color(0xff424242)),
                                   Text("Menu", style: TextStyle(color: Color(0xff424242))),

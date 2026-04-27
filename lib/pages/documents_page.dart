@@ -50,7 +50,10 @@ class _DocumentsPageState extends State<DocumentsPage> {
   }
 
   String _sanitizeFileName(String name) {
-    final sanitized = name.trim().replaceAll(RegExp(r'\s+'), ' ').replaceAll(RegExp(r'[\\/:*?"<>|]'), '_');
+    final sanitized = name
+        .trim()
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .replaceAll(RegExp(r'[\\/:*?"<>|]'), '_');
     return sanitized.isEmpty ? 'document.pdf' : sanitized;
   }
 
@@ -63,7 +66,10 @@ class _DocumentsPageState extends State<DocumentsPage> {
     return pdfDir;
   }
 
-  Future<String> _getLocalPdfPath({required String url, required String fileName}) async {
+  Future<String> _getLocalPdfPath({
+    required String url,
+    required String fileName,
+  }) async {
     final dir = await _getPdfCacheDir();
     final safeName = _sanitizeFileName(fileName);
     final path = '${dir.path}/$safeName';
@@ -90,7 +96,10 @@ class _DocumentsPageState extends State<DocumentsPage> {
         return;
       }
 
-      final localPath = await _getLocalPdfPath(url: url, fileName: '$titre.pdf');
+      final localPath = await _getLocalPdfPath(
+        url: url,
+        fileName: '$titre.pdf',
+      );
 
       final result = await OpenFile.open(localPath);
 
@@ -118,12 +127,16 @@ class _DocumentsPageState extends State<DocumentsPage> {
         return;
       }
 
-      final localPath = await _getLocalPdfPath(url: url, fileName: '$titre.pdf');
-
-      await SharePlus.instance.share(
-        ShareParams(title: "Document : $titre", files: [XFile(localPath)], sharePositionOrigin: Rect.fromLTWH(0, 0, MediaQuery.of(context).size.width, MediaQuery.of(context).size.height / 2)),
+      final localPath = await _getLocalPdfPath(
+        url: url,
+        fileName: '$titre.pdf',
       );
-    } on Exception catch (e) {
+
+      await Share.shareXFiles(
+        [XFile(localPath)],
+        text: "Document : $titre",
+      );
+    } catch (_) {
       if (!mounted) return;
       _snack("Erreur : impossible de partager le document.");
     } finally {
@@ -149,7 +162,8 @@ class _DocumentsPageState extends State<DocumentsPage> {
 
         final String titre = (doc['titre'] ?? '').toString();
         final String url = (doc['url'] ?? '').toString();
-        final DateTime date = DateTime.tryParse((doc['date_mise_en_ligne'] ?? '').toString()) ?? DateTime.now();
+        final DateTime date =
+            DateTime.tryParse((doc['date_mise_en_ligne'] ?? '').toString()) ?? DateTime.now();
 
         return Card(
           margin: const EdgeInsets.symmetric(vertical: 6),

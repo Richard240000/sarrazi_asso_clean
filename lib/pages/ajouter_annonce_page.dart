@@ -36,12 +36,20 @@ class _AjouterAnnoncePageState extends State<AjouterAnnoncePage> {
   Future<void> _envoyerAnnonce() async {
     if (nom == null || email == null || nom!.isEmpty || email!.isEmpty) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Utilisateur non identifié.\nVeuillez vous reconnecter.")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            "Utilisateur non identifié.\nVeuillez vous reconnecter.",
+          ),
+        ),
+      );
       return;
     }
 
     if (titreController.text.isEmpty || descriptionController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Veuillez remplir tous les champs')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Veuillez remplir tous les champs')),
+      );
       return;
     }
 
@@ -62,7 +70,13 @@ class _AjouterAnnoncePageState extends State<AjouterAnnoncePage> {
 
       if (_image != null) {
         final mimeType = lookupMimeType(_image!.path) ?? 'image/jpeg';
-        request.files.add(await http.MultipartFile.fromPath('photo', _image!.path, contentType: MediaType.parse(mimeType)));
+        request.files.add(
+          await http.MultipartFile.fromPath(
+            'photo',
+            _image!.path,
+            contentType: MediaType.parse(mimeType),
+          ),
+        );
       }
 
       final response = await request.send().timeout(const Duration(seconds: 25));
@@ -73,11 +87,15 @@ class _AjouterAnnoncePageState extends State<AjouterAnnoncePage> {
       if (response.statusCode == 200 && respStr.contains('"status":"success"')) {
         Navigator.pop(context, true);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Erreur lors de l'envoi")));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Erreur lors de l'envoi")),
+        );
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Erreur réseau ou serveur")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Erreur réseau ou serveur")),
+      );
     } finally {
       if (mounted) setState(() => loading = false);
     }
@@ -108,7 +126,9 @@ class _AjouterAnnoncePageState extends State<AjouterAnnoncePage> {
           DropdownButtonFormField<String>(
             value: categorieController.text.isNotEmpty ? categorieController.text : null,
             decoration: const InputDecoration(labelText: 'Catégorie'),
-            items: ['Vente', 'Don', 'Service', 'Bon plan', 'Autre'].map((cat) => DropdownMenuItem(value: cat, child: Text(cat))).toList(),
+            items: ['Vente', 'Don', 'Service', 'Bon plan', 'Autre']
+                .map((cat) => DropdownMenuItem(value: cat, child: Text(cat)))
+                .toList(),
             onChanged: (val) => categorieController.text = val ?? '',
           ),
           const SizedBox(height: 20),
@@ -116,7 +136,10 @@ class _AjouterAnnoncePageState extends State<AjouterAnnoncePage> {
               ? Column(
                   children: [
                     Image.file(_image!, height: 200),
-                    TextButton(onPressed: () => setState(() => _image = null), child: const Text('Supprimer la photo')),
+                    TextButton(
+                      onPressed: () => setState(() => _image = null),
+                      child: const Text('Supprimer la photo'),
+                    ),
                   ],
                 )
               : TextButton.icon(
@@ -138,7 +161,11 @@ class _AjouterAnnoncePageState extends State<AjouterAnnoncePage> {
           const SizedBox(height: 30),
           ElevatedButton(
             onPressed: loading ? null : _envoyerAnnonce,
-            style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 50), backgroundColor: Colors.blue, foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(
+              minimumSize: const Size(double.infinity, 50),
+              backgroundColor: Colors.blue,
+              foregroundColor: Colors.white,
+            ),
             child: loading ? const CircularProgressIndicator() : const Text('Publier l\'annonce'),
           ),
         ],

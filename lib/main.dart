@@ -3,11 +3,15 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:sarrazi_asso_clean/pages/accueil_page.dart';
+import 'package:sarrazi_asso_clean/pages/force_update_page.dart';
+import 'package:sarrazi_asso_clean/services/http_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 late SharedPreferences sharedPreferences;
+
 // Handler pour messages reçus en arrière-plan ou appli fermée
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
@@ -50,7 +54,7 @@ void main() async {
 
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -80,15 +84,57 @@ class MyApp extends StatelessWidget {
           filled: true,
           fillColor: Colors.grey[50],
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         ),
         cardTheme: CardThemeData(
           elevation: 2,
-          margin: EdgeInsets.symmetric(vertical: 8),
+          margin: const EdgeInsets.symmetric(vertical: 8),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
       ),
-      home: AccueilPage(),
+      home: const VersionCheckPage(),
     );
+  }
+}
+
+class VersionCheckPage extends StatefulWidget {
+  const VersionCheckPage({super.key});
+
+  @override
+  State<VersionCheckPage> createState() => _VersionCheckPageState();
+}
+
+class _VersionCheckPageState extends State<VersionCheckPage> {
+  @override
+  void initState() {
+    super.initState();
+    checkVersion();
+  }
+
+  Future<void> checkVersion() async {
+    var currentVersion = (await PackageInfo.fromPlatform()).version;
+    //const String currentVersion = "1.1.1"; // à automatiser plus tard
+
+    var result = await HttpService.checkAppVersion(currentVersion);
+
+    if (!mounted) return;
+
+    if (result.isSuccess) {
+      var data = result.data;
+
+      if (data['force_update'] == true) {
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => ForceUpdatePage()));
+      } else {
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const AccueilPage()));
+      }
+    } else {
+      // En cas d’erreur, on laisse passer
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const AccueilPage()));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(body: Center(child: CircularProgressIndicator()));
   }
 }
