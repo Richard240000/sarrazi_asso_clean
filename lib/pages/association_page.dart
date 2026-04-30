@@ -1,6 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:sarrazi_asso_clean/pages/base_page.dart';
 
@@ -72,35 +76,21 @@ class _AssociationPageState extends State<AssociationPage> {
     final uri = Uri.parse(url);
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Impossible d’ouvrir le lien.")),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(behavior: SnackBarBehavior.floating, content: Text("Impossible d’ouvrir le lien.")));
     }
   }
 
   Future<void> _sendEmail() async {
-    final uri = Uri(
-      scheme: "mailto",
-      path: _contactEmail,
-      query: "subject=${Uri.encodeComponent("Contact Association Sarrazi")}",
-    );
+    final uri = Uri(scheme: "mailto", path: _contactEmail, query: "subject=${Uri.encodeComponent("Contact Association Sarrazi")}");
 
     if (!await launchUrl(uri)) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Impossible d’ouvrir l’application mail.")),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(behavior: SnackBarBehavior.floating, content: Text("Impossible d’ouvrir l’application mail.")));
     }
   }
 
-  Widget _sectionCard({
-    required String title,
-    required String content,
-    IconData? icon,
-  }) {
+  Widget _sectionCard({required String title, required String content, Widget? contentWidget, IconData? icon}) {
     return Card(
-      elevation: 2,
-      margin: const EdgeInsets.symmetric(vertical: 8),
       child: Padding(
         padding: const EdgeInsets.all(14),
         child: Column(
@@ -108,23 +98,17 @@ class _AssociationPageState extends State<AssociationPage> {
           children: [
             Row(
               children: [
-                if (icon != null) ...[
-                  Icon(icon),
-                  const SizedBox(width: 10),
-                ],
+                if (icon != null) ...[Icon(icon, color: Colors.blue[800]), const SizedBox(width: 10)],
                 Expanded(
                   child: Text(
                     title,
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue[800]),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 10),
-            Text(
-              content.isEmpty ? "—" : content,
-              style: const TextStyle(fontSize: 15, height: 1.35),
-            ),
+            contentWidget ?? Text(content.isEmpty ? "—" : content, style: const TextStyle(fontSize: 15, height: 1.35)),
           ],
         ),
       ),
@@ -137,38 +121,24 @@ class _AssociationPageState extends State<AssociationPage> {
     final prenom = (m["prenom"] ?? "").toString();
     final tel = (m["telephone"] ?? "").toString().trim();
 
-    return Card(
-      elevation: 2,
-      margin: const EdgeInsets.symmetric(vertical: 6),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Icon(Icons.person),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    role.isEmpty ? "Membre du bureau" : role,
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    "$prenom $nom".trim().isEmpty ? "—" : "$prenom $nom".trim(),
-                    style: const TextStyle(fontSize: 15),
-                  ),
-                  if (tel.isNotEmpty) ...[
-                    const SizedBox(height: 6),
-                    Text("Téléphone : $tel", style: const TextStyle(fontSize: 14)),
-                  ],
-                ],
-              ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        spacing: 12,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.person),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(role.isEmpty ? "Membre du bureau" : role, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                Text("$prenom $nom".trim().isEmpty ? "—" : "$prenom $nom".trim(), style: const TextStyle(fontSize: 15)),
+                if (tel.isNotEmpty) ...[const SizedBox(height: 6), Text("Téléphone : $tel", style: const TextStyle(fontSize: 14))],
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -179,7 +149,7 @@ class _AssociationPageState extends State<AssociationPage> {
     final objet = assoc?["objet"]?.toString() ?? "";
     final associationTxt = assoc?["association"]?.toString() ?? "";
     final mapsUrl = assoc?["google_maps_url"]?.toString().trim() ?? "";
-    final updatedAt = assoc?["updated_at"]?.toString() ?? "";
+    final updatedAt = DateFormat("dd/MM/yyyy à HH:mm").format(DateTime.tryParse(assoc?["updated_at"]?.toString() ?? "") ?? DateTime.now());
 
     if (_loading) {
       return const Center(child: CircularProgressIndicator());
@@ -192,17 +162,9 @@ class _AssociationPageState extends State<AssociationPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                _error!,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 15),
-              ),
+              Text(_error!, textAlign: TextAlign.center, style: const TextStyle(fontSize: 15)),
               const SizedBox(height: 12),
-              ElevatedButton.icon(
-                onPressed: _fetchData,
-                icon: const Icon(Icons.refresh),
-                label: const Text("Réessayer"),
-              ),
+              ElevatedButton.icon(onPressed: _fetchData, icon: const Icon(Icons.refresh), label: const Text("Réessayer")),
             ],
           ),
         ),
@@ -214,34 +176,60 @@ class _AssociationPageState extends State<AssociationPage> {
       child: ListView(
         padding: const EdgeInsets.all(12),
         children: [
+          ElevatedButton.icon(
+            onPressed: _sendEmail,
+            icon: const Icon(Symbols.mail, color: Colors.white, size: 25),
+            label: const Text("Nous écrire", style: TextStyle(color: Colors.white, fontSize: 18)),
+            style: ButtonStyle(
+              elevation: WidgetStatePropertyAll(5),
+              backgroundColor: WidgetStatePropertyAll(Colors.blue[800]),
+              shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5)))),
+            ),
+          ),
+          SizedBox(height: 10),
           Card(
-            elevation: 2,
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Wrap(
-                spacing: 10,
-                runSpacing: 10,
+            child: SizedBox(
+              height: 400,
+              child: FlutterMap(
+                options: MapOptions(
+                  keepAlive: true,
+                  initialCenter: LatLng(45.170355, 0.674726),
+                  initialZoom: 14,
+                  interactionOptions: InteractionOptions(flags: InteractiveFlag.pinchZoom | InteractiveFlag.drag),
+                ),
+
                 children: [
-                  ElevatedButton.icon(
-                    onPressed: _sendEmail,
-                    icon: const Icon(Icons.mail),
-                    label: const Text("Contacter"),
+                  TileLayer(userAgentPackageName: "com.sarrazi.app", urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', retinaMode: true),
+                  CircleLayer(
+                    circles: [CircleMarker(point: LatLng(45.170355, 0.674726), radius: 600, color: Colors.indigo.withAlpha(60), useRadiusInMeter: true)],
                   ),
-                  if (mapsUrl.isNotEmpty)
-                    OutlinedButton.icon(
-                      onPressed: () => _openUrl(mapsUrl),
-                      icon: const Icon(Icons.map),
-                      label: const Text("Google Maps"),
+                  Align(
+                    alignment: AlignmentGeometry.bottomCenter,
+                    child: Padding(
+                      padding: EdgeInsets.only(bottom: 0),
+                      child: InkWell(
+                        child: Text(' © OpenStreetMap contributors ', style: TextStyle(color: Colors.black38)),
+                        onTap: () => launchUrl(Uri.parse('https://openstreetmap.org/copyright')),
+                      ),
                     ),
-                  OutlinedButton.icon(
-                    onPressed: _fetchData,
-                    icon: const Icon(Icons.refresh),
-                    label: const Text("Rafraîchir"),
                   ),
                 ],
               ),
             ),
           ),
+
+          _sectionCard(title: "Lieu-dit", content: lieuDit, icon: Icons.place),
+          _sectionCard(title: "Objet", content: objet, icon: Icons.flag),
+          _sectionCard(title: "L’association", content: associationTxt, icon: Icons.groups),
+          if (_bureau.isEmpty)
+            _sectionCard(title: "Bureau", content: 'Aucun membre du bureau enregistré pour le moment', icon: Icons.apartment)
+          else
+            _sectionCard(
+              title: "Bureau",
+              content: '',
+              contentWidget: Column(children: [..._bureau.map((e) => _bureauCard((e as Map).cast<String, dynamic>())).toList()]),
+              icon: Icons.apartment,
+            ),
 
           if (updatedAt.isNotEmpty)
             Padding(
@@ -249,40 +237,9 @@ class _AssociationPageState extends State<AssociationPage> {
               child: Text(
                 "Mise à jour : $updatedAt",
                 style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
+                textAlign: TextAlign.center,
               ),
             ),
-
-          _sectionCard(
-            title: "Lieu-dit",
-            content: lieuDit,
-            icon: Icons.place,
-          ),
-          _sectionCard(
-            title: "Objet",
-            content: objet,
-            icon: Icons.flag,
-          ),
-          _sectionCard(
-            title: "L’association",
-            content: associationTxt,
-            icon: Icons.groups,
-          ),
-
-          const SizedBox(height: 6),
-          const Text(
-            "Bureau",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 6),
-
-          if (_bureau.isEmpty)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 10),
-              child: Text("— Aucun membre du bureau enregistré pour le moment."),
-            )
-          else
-            ..._bureau.map((e) => _bureauCard((e as Map).cast<String, dynamic>())).toList(),
-
           const SizedBox(height: 16),
         ],
       ),
@@ -291,9 +248,6 @@ class _AssociationPageState extends State<AssociationPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BasePage(
-      title: "L’Association",
-      body: _buildBody(),
-    );
+    return BasePage(title: "L’Association", body: _buildBody());
   }
 }

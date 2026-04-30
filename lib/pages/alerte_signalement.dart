@@ -1,6 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
+import 'package:material_symbols_icons/symbols.dart';
+import 'package:sarrazi_asso_clean/extensions/string_extensions.dart';
 import 'package:sarrazi_asso_clean/main.dart';
 import 'package:sarrazi_asso_clean/widgets/login_bottom_sheet.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -181,7 +184,7 @@ class _AlerteSignalementPageState extends State<AlerteSignalementPage> with Sing
 
   void _showError(Object e) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(behavior: SnackBarBehavior.floating, content: Text(e.toString())));
   }
 
   Color _statusColor(String status) {
@@ -224,7 +227,8 @@ class _AlerteSignalementPageState extends State<AlerteSignalementPage> with Sing
           return _ErrorView(error: snap.error.toString(), onRetry: _refreshAlertes);
         }
 
-        final items = snap.data ?? [];
+        final items = (snap.data ?? []).where((x) => x.texte.trim().isNotEmpty).toList();
+
         if (items.isEmpty) {
           return RefreshIndicator(
             onRefresh: _refreshAlertes,
@@ -245,33 +249,62 @@ class _AlerteSignalementPageState extends State<AlerteSignalementPage> with Sing
             itemCount: items.length,
             itemBuilder: (context, i) {
               final a = items[i];
-
+              var date = DateTime.tryParse(a.dateAjout) ?? DateTime.now();
+              var color = Colors.blue[800];
               return Padding(
-                padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
-                child: Card(
-                  elevation: 1.5,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+                child: Column(
+                  spacing: 5,
+                  children: [
+                    Row(
+                      spacing: 10,
                       children: [
-                        Row(
-                          children: [
-                            const CircleAvatar(child: Icon(Icons.notifications_active)),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(a.nature.isNotEmpty ? a.nature : 'Alerte', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        if (a.texte.trim().isNotEmpty) Text(a.texte, style: const TextStyle(fontSize: 15)),
-                        const SizedBox(height: 10),
-                        Text('Par : ${a.nom.isEmpty ? "Administration" : a.nom} • ${_formatDate(a.dateAjout)}', style: const TextStyle(fontSize: 12, color: Colors.black54)),
+                        Expanded(child: Container(height: 2, color: Colors.blue[800])),
+                        Icon(Icons.notifications, color: color),
+                        Expanded(child: Container(height: 2, color: Colors.blue[800])),
                       ],
                     ),
-                  ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+                      child: Row(
+                        spacing: 5,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "${DateFormat("EEEE", 'fr').format(date)}".capitalize(),
+                            style: TextStyle(color: color, fontWeight: FontWeight.w600, fontSize: 16),
+                          ),
+                          Text(
+                            "${DateFormat("dd", 'fr').format(date)}".capitalize(),
+                            style: TextStyle(color: color, fontWeight: FontWeight.w600, fontSize: 16),
+                          ),
+
+                          Text(
+                            "${DateFormat("MMMM", 'fr').format(date)}".capitalize(),
+                            style: TextStyle(color: color, fontWeight: FontWeight.w600, fontSize: 16),
+                          ),
+                          Text(
+                            "${DateFormat("yyyy", 'fr').format(date)}",
+                            style: TextStyle(color: color, fontWeight: FontWeight.w600, fontSize: 16),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    Card(
+                      margin: EdgeInsets.only(bottom: 20),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Text(a.texte, style: const TextStyle(fontSize: 15)),
+                            Text('Par : ${a.nom.isEmpty ? "Administration" : a.nom} • ${_formatDate(a.dateAjout)}', style: const TextStyle(fontSize: 12, color: Colors.black45)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               );
             },
@@ -301,8 +334,12 @@ class _AlerteSignalementPageState extends State<AlerteSignalementPage> with Sing
         ),
         if (!canPost)
           const Padding(
-            padding: EdgeInsets.fromLTRB(12, 6, 12, 0),
-            child: Text("Lecture possible sans connexion. Connectez-vous pour publier, liker et changer le statut.", style: TextStyle(fontSize: 12, color: Colors.black54)),
+            padding: EdgeInsets.fromLTRB(12, 6, 12, 6),
+            child: Text(
+              "Lecture possible sans connexion. Connectez-vous pour publier, liker et changer le statut.",
+              style: TextStyle(fontSize: 12, color: Colors.black54),
+              textAlign: TextAlign.center,
+            ),
           ),
         const SizedBox(height: 6),
         Expanded(
@@ -340,20 +377,20 @@ class _AlerteSignalementPageState extends State<AlerteSignalementPage> with Sing
                     final p = items[i];
 
                     return Padding(
-                      padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+                      padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
                       child: Card(
-                        elevation: 1.5,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        clipBehavior: Clip.hardEdge,
                         child: Padding(
                           padding: const EdgeInsets.all(12),
                           child: Column(
+                            spacing: 10,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                spacing: 12,
                                 children: [
-                                  const CircleAvatar(child: Icon(Icons.report_problem)),
-                                  const SizedBox(width: 12),
+                                  Icon(Symbols.error, color: Colors.orange, size: 30, weight: 600),
                                   Expanded(
                                     child: Text(
                                       p.titre,
@@ -364,28 +401,55 @@ class _AlerteSignalementPageState extends State<AlerteSignalementPage> with Sing
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 10),
                               Wrap(
                                 spacing: 8,
-                                runSpacing: 8,
+                                runSpacing: 4,
                                 children: [
-                                  const Chip(label: Text('Signalement'), visualDensity: VisualDensity.compact),
-                                  Chip(label: Text(p.categorie.isEmpty ? 'Autre' : p.categorie), visualDensity: VisualDensity.compact),
-                                  if ((p.secteur ?? '').trim().isNotEmpty) Chip(label: Text(p.secteur!), visualDensity: VisualDensity.compact),
                                   Chip(
-                                    label: Text(_statusLabel(p.statut)),
+                                    label: Text('Signalement', style: TextStyle(color: Colors.black87)),
                                     visualDensity: VisualDensity.compact,
-                                    side: BorderSide(color: _statusColor(p.statut)),
+                                    color: WidgetStatePropertyAll(Colors.white),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                                   ),
-                                  if (p.urgence == 'urgent') const Chip(label: Text('URGENT'), visualDensity: VisualDensity.compact),
-                                  if (p.urgence == 'faible') const Chip(label: Text('Faible'), visualDensity: VisualDensity.compact),
+                                  Chip(
+                                    label: Text(p.categorie.isEmpty ? 'Autre' : p.categorie, style: TextStyle(color: Colors.black87)),
+                                    visualDensity: VisualDensity.compact,
+                                    color: WidgetStatePropertyAll(Colors.white),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                                  ),
+                                  if ((p.secteur ?? '').trim().isNotEmpty)
+                                    Chip(
+                                      label: Text(p.secteur!, style: TextStyle(color: Colors.black87)),
+                                      visualDensity: VisualDensity.compact,
+                                      color: WidgetStatePropertyAll(Colors.white),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                                    ),
+                                  Chip(
+                                    label: Text(_statusLabel(p.statut), style: TextStyle(color: Colors.white)),
+                                    visualDensity: VisualDensity.compact,
+                                    color: WidgetStatePropertyAll(_statusColor(p.statut)),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                                  ),
+
+                                  if (p.urgence == 'urgent')
+                                    Chip(
+                                      label: Text('URGENT', style: TextStyle(color: Colors.black87)),
+                                      visualDensity: VisualDensity.compact,
+                                      color: WidgetStatePropertyAll(Colors.white),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                                    ),
+                                  if (p.urgence == 'faible')
+                                    Chip(
+                                      label: Text('Faible', style: TextStyle(color: Colors.black87)),
+                                      visualDensity: VisualDensity.compact,
+                                      color: WidgetStatePropertyAll(Colors.white),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                                    ),
                                 ],
                               ),
-                              const SizedBox(height: 10),
+
                               Text(p.description, maxLines: 4, overflow: TextOverflow.ellipsis),
-                              const SizedBox(height: 10),
                               Text('Par : ${p.auteurNom.isEmpty ? "—" : p.auteurNom} • ${_formatDate(p.createdAt)}', style: const TextStyle(fontSize: 12, color: Colors.black54)),
-                              const SizedBox(height: 6),
                               Align(
                                 alignment: Alignment.centerRight,
                                 child: _TrailingActions(
@@ -431,11 +495,7 @@ class _AlerteSignalementPageState extends State<AlerteSignalementPage> with Sing
   }
 
   static String _formatDate(String isoOrDateTime) {
-    if (isoOrDateTime.trim().isEmpty) return '';
-    if (isoOrDateTime.length >= 16) {
-      return isoOrDateTime.substring(0, 16).replaceFirst('T', ' ');
-    }
-    return isoOrDateTime;
+    return DateFormat("dd/MM/yyyy à HH:mm").format(DateTime.tryParse(isoOrDateTime) ?? DateTime.now());
   }
 
   @override
@@ -445,18 +505,21 @@ class _AlerteSignalementPageState extends State<AlerteSignalementPage> with Sing
     return BasePage(
       title: 'Alertes & Signalements',
       body: Column(
+        spacing: 0,
         children: [
           Material(
             color: Colors.white,
             child: TabBar(
               controller: _tabController,
-              labelColor: Theme.of(context).primaryColor,
-              indicatorColor: Theme.of(context).primaryColor,
-              unselectedLabelColor: Colors.black54,
+              labelColor: Colors.white,
+              indicatorColor: Colors.white,
+              unselectedLabelColor: Colors.blue[800],
               indicatorSize: TabBarIndicatorSize.tab,
+              indicator: BoxDecoration(color: Colors.blue[800]),
+              dividerColor: Colors.blue[800],
               tabs: const [
-                Tab(text: 'Alertes', icon: Icon(Icons.notifications)),
-                Tab(text: 'Signalements', icon: Icon(Icons.report_problem)),
+                Tab(text: 'Alertes', icon: Icon(Icons.notifications), height: 55),
+                Tab(text: 'Signalements', icon: Icon(Icons.report_problem), height: 55),
               ],
             ),
           ),
@@ -501,21 +564,15 @@ class _FiltersBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 10, 12, 6),
-      child: Wrap(
-        spacing: 12,
-        runSpacing: 10,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        children: [
-          DropdownButton<String>(
-            value: sort,
-            onChanged: (v) => v == null ? null : onSortChanged(v),
-            items: const [
-              DropdownMenuItem(value: 'recent', child: Text('Tri : Récent')),
-              DropdownMenuItem(value: 'likes', child: Text('Tri : Likes')),
-              DropdownMenuItem(value: 'status', child: Text('Tri : Statut')),
-            ],
-          ),
+      padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+      child: DropdownButton<String>(
+        value: sort,
+        onChanged: (v) => v == null ? null : onSortChanged(v),
+        isExpanded: true,
+        items: const [
+          DropdownMenuItem(value: 'recent', child: Text('Tri : Récent')),
+          DropdownMenuItem(value: 'likes', child: Text('Tri : Likes')),
+          DropdownMenuItem(value: 'status', child: Text('Tri : Statut')),
         ],
       ),
     );
@@ -537,6 +594,7 @@ class _TrailingActions extends StatelessWidget {
 
     return Row(
       mainAxisSize: MainAxisSize.min,
+      spacing: 10,
       children: [
         InkWell(
           onTap: canInteract ? () => onLike() : null,
@@ -545,9 +603,9 @@ class _TrailingActions extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(publication.likedByMe ? Icons.thumb_up : Icons.thumb_up_outlined, size: 20),
+                Icon(publication.likedByMe ? Icons.thumb_up : Icons.thumb_up_outlined, size: 25, color: publication.likedByMe ? Colors.blue[800] : Colors.black87),
                 const SizedBox(width: 4),
-                Text('${publication.likesCount}', style: const TextStyle(fontSize: 12)),
+                Text('${publication.likesCount}', style: TextStyle(fontSize: 14, color: publication.likedByMe ? Colors.blue[800] : Colors.black87)),
               ],
             ),
           ),
@@ -561,7 +619,7 @@ class _TrailingActions extends StatelessWidget {
             PopupMenuItem(value: 'en_cours', child: Text('En cours')),
             PopupMenuItem(value: 'resolu', child: Text('Résolu')),
           ],
-          child: const Padding(padding: EdgeInsets.symmetric(vertical: 2, horizontal: 6), child: Icon(Icons.more_vert, size: 20)),
+          child: Icon(Icons.more_vert, size: 25),
         ),
       ],
     );

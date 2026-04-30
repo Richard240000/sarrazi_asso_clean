@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:mime/mime.dart';
 import 'package:sarrazi_asso_clean/pages/base_page.dart';
 import 'package:sarrazi_asso_clean/main.dart';
@@ -36,20 +37,12 @@ class _AjouterAnnoncePageState extends State<AjouterAnnoncePage> {
   Future<void> _envoyerAnnonce() async {
     if (nom == null || email == null || nom!.isEmpty || email!.isEmpty) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            "Utilisateur non identifié.\nVeuillez vous reconnecter.",
-          ),
-        ),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(behavior: SnackBarBehavior.floating, content: Text("Utilisateur non identifié.\nVeuillez vous reconnecter.")));
       return;
     }
 
     if (titreController.text.isEmpty || descriptionController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Veuillez remplir tous les champs')),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(behavior: SnackBarBehavior.floating, content: Text('Veuillez remplir tous les champs')));
       return;
     }
 
@@ -70,13 +63,7 @@ class _AjouterAnnoncePageState extends State<AjouterAnnoncePage> {
 
       if (_image != null) {
         final mimeType = lookupMimeType(_image!.path) ?? 'image/jpeg';
-        request.files.add(
-          await http.MultipartFile.fromPath(
-            'photo',
-            _image!.path,
-            contentType: MediaType.parse(mimeType),
-          ),
-        );
+        request.files.add(await http.MultipartFile.fromPath('photo', _image!.path, contentType: MediaType.parse(mimeType)));
       }
 
       final response = await request.send().timeout(const Duration(seconds: 25));
@@ -87,15 +74,11 @@ class _AjouterAnnoncePageState extends State<AjouterAnnoncePage> {
       if (response.statusCode == 200 && respStr.contains('"status":"success"')) {
         Navigator.pop(context, true);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Erreur lors de l'envoi")),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(behavior: SnackBarBehavior.floating, content: Text("Erreur lors de l'envoi")));
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Erreur réseau ou serveur")),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(behavior: SnackBarBehavior.floating, content: Text("Erreur réseau ou serveur")));
     } finally {
       if (mounted) setState(() => loading = false);
     }
@@ -110,25 +93,24 @@ class _AjouterAnnoncePageState extends State<AjouterAnnoncePage> {
     return SingleChildScrollView(
       padding: EdgeInsets.all(16),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           TextField(
             controller: titreController,
-            decoration: const InputDecoration(labelText: 'Titre*'),
+            decoration: const InputDecoration(labelText: 'Titre*', border: OutlineInputBorder()),
           ),
           const SizedBox(height: 20),
           TextField(
             textAlignVertical: TextAlignVertical.top,
             controller: descriptionController,
-            decoration: const InputDecoration(labelText: 'Description*'),
+            decoration: const InputDecoration(labelText: 'Description*', border: OutlineInputBorder()),
             maxLines: 4,
           ),
           const SizedBox(height: 20),
           DropdownButtonFormField<String>(
-            value: categorieController.text.isNotEmpty ? categorieController.text : null,
-            decoration: const InputDecoration(labelText: 'Catégorie'),
-            items: ['Vente', 'Don', 'Service', 'Bon plan', 'Autre']
-                .map((cat) => DropdownMenuItem(value: cat, child: Text(cat)))
-                .toList(),
+            initialValue: categorieController.text.isNotEmpty ? categorieController.text : null,
+            decoration: const InputDecoration(labelText: 'Catégorie', border: OutlineInputBorder()),
+            items: ['Vente', 'Don', 'Service', 'Bon plan', 'Autre'].map((cat) => DropdownMenuItem(value: cat, child: Text(cat))).toList(),
             onChanged: (val) => categorieController.text = val ?? '',
           ),
           const SizedBox(height: 20),
@@ -136,10 +118,7 @@ class _AjouterAnnoncePageState extends State<AjouterAnnoncePage> {
               ? Column(
                   children: [
                     Image.file(_image!, height: 200),
-                    TextButton(
-                      onPressed: () => setState(() => _image = null),
-                      child: const Text('Supprimer la photo'),
-                    ),
+                    TextButton(onPressed: () => setState(() => _image = null), child: const Text('Supprimer la photo')),
                   ],
                 )
               : TextButton.icon(
@@ -156,17 +135,29 @@ class _AjouterAnnoncePageState extends State<AjouterAnnoncePage> {
           const SizedBox(height: 8),
           const Text(
             "Annonce publiée après validation",
+            textAlign: TextAlign.center,
             style: TextStyle(fontSize: 14, color: Colors.grey, fontStyle: FontStyle.italic),
           ),
           const SizedBox(height: 30),
-          ElevatedButton(
+          // ElevatedButton(
+          //   onPressed: loading ? null : _envoyerAnnonce,
+          //   style: ElevatedButton.styleFrom(
+          //     minimumSize: const Size(double.infinity, 50),
+          //     backgroundColor: Colors.blue,
+          //     foregroundColor: Colors.white,
+          //   ),
+          //   child: loading ? const CircularProgressIndicator() : const Text('Publier l\'annonce'),
+          // ),
+          ElevatedButton.icon(
             onPressed: loading ? null : _envoyerAnnonce,
-            style: ElevatedButton.styleFrom(
-              minimumSize: const Size(double.infinity, 50),
-              backgroundColor: Colors.blue,
-              foregroundColor: Colors.white,
+            icon: const Icon(Symbols.send, color: Colors.white, size: 25),
+            label: Text(loading ? 'Envoi...' : 'Publier l\'annonce', style: TextStyle(color: Colors.white, fontSize: 16)),
+            style: ButtonStyle(
+              padding: WidgetStatePropertyAll(EdgeInsetsGeometry.all(10)),
+              elevation: WidgetStatePropertyAll(5),
+              backgroundColor: WidgetStatePropertyAll(Colors.blue[800]),
+              shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5)))),
             ),
-            child: loading ? const CircularProgressIndicator() : const Text('Publier l\'annonce'),
           ),
         ],
       ),

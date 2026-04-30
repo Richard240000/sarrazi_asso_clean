@@ -1,5 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:focus_detector_v2/focus_detector_v2.dart';
+import 'package:material_symbols_icons/symbols.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:sarrazi_asso_clean/main.dart';
 import 'package:sarrazi_asso_clean/pages/agenda_page.dart';
 import 'package:sarrazi_asso_clean/pages/annonces_page.dart';
@@ -11,13 +16,15 @@ import 'package:sarrazi_asso_clean/pages/association_page.dart';
 import 'package:sarrazi_asso_clean/pages/alerte_signalement.dart';
 
 class BasePage extends StatefulWidget {
-  const BasePage({super.key, required this.title, required this.body, this.isHome = false, this.floatingButton, this.isBottomBarVisible = true});
+  const BasePage({super.key, required this.title, required this.body, this.isHome = false, this.floatingButton, this.isBottomBarVisible = true, this.message, this.withContact = false});
 
   final String title;
   final Widget body;
   final Widget? floatingButton;
   final bool isHome;
   final bool isBottomBarVisible;
+  final String? message;
+  final bool withContact;
 
   @override
   State<BasePage> createState() => _BasePageState();
@@ -25,7 +32,6 @@ class BasePage extends StatefulWidget {
 
 class _BasePageState extends State<BasePage> {
   String? utilisateur;
-
   final GlobalKey _menuKey = GlobalKey();
 
   @override
@@ -36,40 +42,75 @@ class _BasePageState extends State<BasePage> {
           utilisateur = sharedPreferences.getString('nom');
         });
       },
-      child: SafeArea(
-        top: false,
-        child: Scaffold(
-          appBar: AppBar(
-            foregroundColor: Colors.blue[800],
-            title: Text(widget.title),
-            automaticallyImplyLeading: true,
-            actions: [
-              utilisateur?.isNotEmpty ?? false
-                  ? IconButton(
-                      onPressed: () async {
-                        await sharedPreferences.clear();
-                        setState(() {
-                          utilisateur = sharedPreferences.getString('nom');
-                        });
-                        if (!widget.isHome) {
-                          if (!context.mounted) return;
-                          Navigator.popUntil(context, (x) => x.isFirst);
-                        }
-                      },
-                      icon: const Icon(Icons.power_settings_new),
-                    )
-                  : const SizedBox.shrink(),
-            ],
-          ),
-          body: widget.body,
-          floatingActionButton: widget.floatingButton,
-          bottomNavigationBar: widget.isBottomBarVisible
-              ? Column(
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          surfaceTintColor: Colors.white,
+          foregroundColor: Colors.blue[800],
+          title: Text(widget.title),
+          automaticallyImplyLeading: true,
+          actions: [
+            utilisateur?.isNotEmpty ?? false
+                ? IconButton(
+                    onPressed: () async {
+                      await sharedPreferences.remove('user_id');
+                      await sharedPreferences.remove('nom');
+                      setState(() {
+                        utilisateur = sharedPreferences.getString('nom');
+                      });
+                      if (!widget.isHome) {
+                        if (!context.mounted) return;
+                        Navigator.popUntil(context, (x) => x.isFirst);
+                      }
+                    },
+                    icon: const Icon(Icons.power_settings_new),
+                  )
+                : const SizedBox.shrink(),
+          ],
+        ),
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(child: widget.body),
+            widget.message?.isNotEmpty ?? false
+                ? GestureDetector(
+                    onTap: widget.withContact ? () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AssociationPage())) : () {},
+                    child: Container(
+                      color: Colors.blue.withAlpha(20),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          spacing: 5,
+                          children: [
+                            Text(
+                              widget.message!,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: Colors.indigo),
+                            ),
+                            widget.withContact
+                                ? InkWell(
+                                    child: Icon(Icons.mail, color: Colors.indigo),
+                                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AssociationPage())),
+                                  )
+                                : SizedBox.shrink(),
+                          ],
+                        ),
+                      ),
+                    ),
+                  )
+                : SizedBox.shrink(),
+          ],
+        ),
+        floatingActionButton: widget.floatingButton,
+        bottomNavigationBar: widget.isBottomBarVisible
+            ? Padding(
+                padding: EdgeInsets.only(bottom: Platform.isAndroid ? kBottomNavigationBarHeight : 0),
+                child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const Divider(height: 1),
                     Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      padding: const EdgeInsets.only(top: 5),
                       child: Row(
                         children: [
                           Expanded(
@@ -176,6 +217,17 @@ class _BasePageState extends State<BasePage> {
                                         ],
                                       ),
                                     ),
+                                    PopupMenuItem<String>(
+                                      value: '-',
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.end,
+                                        spacing: 10,
+                                        children: [
+                                          Text(version ?? '', style: TextStyle(color: Colors.white)),
+                                          Icon(Symbols.deployed_code, size: 25, color: Colors.white),
+                                        ],
+                                      ),
+                                    ),
                                   ],
                                 );
 
@@ -243,9 +295,9 @@ class _BasePageState extends State<BasePage> {
                       ),
                     ),
                   ],
-                )
-              : SizedBox.fromSize(),
-        ),
+                ),
+              )
+            : SizedBox.fromSize(),
       ),
     );
   }

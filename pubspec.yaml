@@ -2,7 +2,7 @@ name: sarrazi_asso_clean
 description: "A new Flutter project."
 
 publish_to: 'none'
-version: 1.2.0+1018
+version: 1.2.0+1200
 
 environment:
   sdk: ^3.9.0
@@ -19,7 +19,7 @@ dependencies:
   url_launcher: ^6.3.0 # ou la dernière version disponible
   url_launcher_android: ^6.2.5
   http: ^1.2.1
-  webview_flutter: ^4.2.2
+  webview_flutter: ^4.13.1
   intl: ^0.20.2
   share_plus: ^12.0.0
   shared_preferences: ^2.2.2  # <-- ajoute ceci
@@ -37,6 +37,10 @@ dependencies:
   flutter_email_sender: ^8.0.0
   internet_connection_checker_plus: ^2.9.0
   package_info_plus: ^9.0.1
+  material_symbols_icons: ^4.2928.1
+  collection: ^1.19.1
+  flutter_map: ^8.3.0
+  latlong2: ^0.9.1
   
 dev_dependencies:
   flutter_test:

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:sarrazi_asso_clean/services/http_service.dart';
 import 'package:sarrazi_asso_clean/pages/forgot_password_page.dart';
 
@@ -36,6 +37,7 @@ class _LoginBottomSheetState extends State<LoginBottomSheet> {
 
     if (response?.isSuccess ?? false) {
       if (!mounted) return;
+      TextInput.finishAutofillContext();
       Navigator.pop(context, true);
     } else {
       setState(() {
@@ -46,20 +48,20 @@ class _LoginBottomSheetState extends State<LoginBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-      child: SafeArea(
-        child: Wrap(
-          children: [
-            Container(
-              color: Colors.blue[800],
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                    child: Center(
+    return Wrap(
+      children: [
+        Container(
+          color: Colors.blue[800],
+          child: Padding(
+            padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom < 100 ? kBottomNavigationBarHeight : MediaQuery.of(context).viewInsets.bottom),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                  child: Center(
+                    child: AutofillGroup(
                       child: Form(
                         key: _formKey,
                         child: Column(
@@ -75,6 +77,7 @@ class _LoginBottomSheetState extends State<LoginBottomSheet> {
 
                             // Champ EMAIL
                             TextFormField(
+                              autofillHints: [AutofillHints.newUsername, AutofillHints.username],
                               controller: emailController,
                               decoration: InputDecoration(
                                 hintText: "Adresse mail",
@@ -96,6 +99,7 @@ class _LoginBottomSheetState extends State<LoginBottomSheet> {
 
                             // Champ MOT DE PASSE
                             TextFormField(
+                              autofillHints: [AutofillHints.password],
                               controller: passwordController,
                               obscureText: true,
                               decoration: InputDecoration(
@@ -156,27 +160,27 @@ class _LoginBottomSheetState extends State<LoginBottomSheet> {
                       ),
                     ),
                   ),
+                ),
 
-                  // Message d’erreur
-                  errorMessage?.isNotEmpty ?? false
-                      ? Container(
-                          color: Colors.red,
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              errorMessage ?? '',
-                              style: TextStyle(color: Colors.white),
-                              textAlign: TextAlign.center,
-                            ),
+                // Message d’erreur
+                errorMessage?.isNotEmpty ?? false
+                    ? Container(
+                        color: Colors.red,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            errorMessage ?? '',
+                            style: TextStyle(color: Colors.white),
+                            textAlign: TextAlign.center,
                           ),
-                        )
-                      : SizedBox.shrink(),
-                ],
-              ),
+                        ),
+                      )
+                    : SizedBox.shrink(),
+              ],
             ),
-          ],
+          ),
         ),
-      ),
+      ],
     );
   }
 }

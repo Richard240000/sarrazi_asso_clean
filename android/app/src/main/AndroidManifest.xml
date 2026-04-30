@@ -14,7 +14,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
-        android:label="SarraziApp"
+        android:label="Sarrazi"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         tools:targetApi="31">

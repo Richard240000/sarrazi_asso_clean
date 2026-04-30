@@ -12,6 +12,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:sarrazi_asso_clean/pages/base_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -63,13 +64,13 @@ class _AjouterPublicationPageState extends State<AjouterPublicationPage> {
     });
 
     if (uid == null && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Vous devez être connecté pour envoyer un signalement.")));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(behavior: SnackBarBehavior.floating, content: Text("Vous devez être connecté pour envoyer un signalement.")));
     }
   }
 
   Future<void> _submit() async {
     if (_userId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Vous devez être connecté pour envoyer un signalement.")));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(behavior: SnackBarBehavior.floating, content: Text("Vous devez être connecté pour envoyer un signalement.")));
       return;
     }
 
@@ -123,7 +124,7 @@ class _AjouterPublicationPageState extends State<AjouterPublicationPage> {
       Navigator.of(context).pop(true);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(behavior: SnackBarBehavior.floating, content: Text('Erreur: $e')));
     } finally {
       if (mounted) {
         setState(() => _submitting = false);
@@ -145,12 +146,13 @@ class _AjouterPublicationPageState extends State<AjouterPublicationPage> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     _buildUrgenceSelector(),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 24),
 
                     TextFormField(
                       controller: _titreCtrl,
                       decoration: const InputDecoration(labelText: 'Titre', hintText: 'Ex : Lampadaire en panne', border: OutlineInputBorder()),
                       maxLength: 120,
+                      textInputAction: TextInputAction.next,
                       validator: (v) {
                         final s = (v ?? '').trim();
                         if (s.isEmpty) return 'Titre obligatoire';
@@ -164,6 +166,7 @@ class _AjouterPublicationPageState extends State<AjouterPublicationPage> {
                       controller: _catCtrl,
                       decoration: const InputDecoration(labelText: 'Catégorie (optionnel)', hintText: 'Ex : Éclairage, Voirie, Sécurité…', border: OutlineInputBorder()),
                       maxLength: 50,
+                      textInputAction: TextInputAction.next,
                       validator: (v) {
                         final s = (v ?? '').trim();
                         if (s.length > 50) return 'Max 50 caractères';
@@ -176,6 +179,7 @@ class _AjouterPublicationPageState extends State<AjouterPublicationPage> {
                       controller: _secteurCtrl,
                       decoration: const InputDecoration(labelText: 'Secteur (optionnel)', hintText: 'Ex : Route de Sarrazi , Rue du Hameau …', border: OutlineInputBorder()),
                       maxLength: 80,
+                      textInputAction: TextInputAction.next,
                       validator: (v) {
                         final s = (v ?? '').trim();
                         if (s.length > 80) return 'Max 80 caractères';
@@ -202,11 +206,17 @@ class _AjouterPublicationPageState extends State<AjouterPublicationPage> {
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 18),
+
                     ElevatedButton.icon(
                       onPressed: _submitting ? null : _submit,
-                      icon: _submitting ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.send),
-                      label: Text(_submitting ? 'Envoi...' : 'Envoyer le signalement'),
-                      style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14)),
+                      icon: _submitting ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Symbols.send, color: Colors.white, size: 25),
+                      label: Text(_submitting ? 'Envoi...' : 'Envoyer le signalement', style: TextStyle(color: Colors.white, fontSize: 16)),
+                      style: ButtonStyle(
+                        padding: WidgetStatePropertyAll(EdgeInsetsGeometry.all(10)),
+                        elevation: WidgetStatePropertyAll(5),
+                        backgroundColor: WidgetStatePropertyAll(Colors.blue[800]),
+                        shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5)))),
+                      ),
                     ),
                   ],
                 ),
@@ -218,8 +228,11 @@ class _AjouterPublicationPageState extends State<AjouterPublicationPage> {
   Widget _buildUrgenceSelector() {
     return InputDecorator(
       decoration: const InputDecoration(labelText: 'Niveau d’urgence', border: OutlineInputBorder()),
+
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
+          padding: EdgeInsets.symmetric(vertical: 2),
+          isDense: true,
           value: _urgence,
           isExpanded: true,
           items: const [

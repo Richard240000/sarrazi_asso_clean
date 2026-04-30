@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sarrazi_asso_clean/pages/base_page.dart';
@@ -46,14 +47,11 @@ class _DocumentsPageState extends State<DocumentsPage> {
   }
 
   void _snack(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(behavior: SnackBarBehavior.floating, content: Text(msg)));
   }
 
   String _sanitizeFileName(String name) {
-    final sanitized = name
-        .trim()
-        .replaceAll(RegExp(r'\s+'), ' ')
-        .replaceAll(RegExp(r'[\\/:*?"<>|]'), '_');
+    final sanitized = name.trim().replaceAll(RegExp(r'\s+'), ' ').replaceAll(RegExp(r'[\\/:*?"<>|]'), '_');
     return sanitized.isEmpty ? 'document.pdf' : sanitized;
   }
 
@@ -66,10 +64,7 @@ class _DocumentsPageState extends State<DocumentsPage> {
     return pdfDir;
   }
 
-  Future<String> _getLocalPdfPath({
-    required String url,
-    required String fileName,
-  }) async {
+  Future<String> _getLocalPdfPath({required String url, required String fileName}) async {
     final dir = await _getPdfCacheDir();
     final safeName = _sanitizeFileName(fileName);
     final path = '${dir.path}/$safeName';
@@ -96,10 +91,7 @@ class _DocumentsPageState extends State<DocumentsPage> {
         return;
       }
 
-      final localPath = await _getLocalPdfPath(
-        url: url,
-        fileName: '$titre.pdf',
-      );
+      final localPath = await _getLocalPdfPath(url: url, fileName: '$titre.pdf');
 
       final result = await OpenFile.open(localPath);
 
@@ -127,15 +119,9 @@ class _DocumentsPageState extends State<DocumentsPage> {
         return;
       }
 
-      final localPath = await _getLocalPdfPath(
-        url: url,
-        fileName: '$titre.pdf',
-      );
+      final localPath = await _getLocalPdfPath(url: url, fileName: '$titre.pdf');
 
-      await Share.shareXFiles(
-        [XFile(localPath)],
-        text: "Document : $titre",
-      );
+      await Share.shareXFiles([XFile(localPath)], text: "Document : $titre");
     } catch (_) {
       if (!mounted) return;
       _snack("Erreur : impossible de partager le document.");
@@ -155,28 +141,58 @@ class _DocumentsPageState extends State<DocumentsPage> {
     if (documents.isEmpty) return const Center(child: Text('Aucun document disponible.'));
 
     return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 30, 16, 16),
+      padding: const EdgeInsets.all(8),
       itemCount: documents.length,
       itemBuilder: (context, index) {
         final doc = documents[index];
 
         final String titre = (doc['titre'] ?? '').toString();
         final String url = (doc['url'] ?? '').toString();
-        final DateTime date =
-            DateTime.tryParse((doc['date_mise_en_ligne'] ?? '').toString()) ?? DateTime.now();
+        final DateTime date = DateTime.tryParse((doc['date_mise_en_ligne'] ?? '').toString()) ?? DateTime.now();
 
         return Card(
-          margin: const EdgeInsets.symmetric(vertical: 6),
           child: ListTile(
-            leading: const Icon(Icons.picture_as_pdf, color: Colors.redAccent),
-            title: Text(titre, style: const TextStyle(fontWeight: FontWeight.bold)),
-            subtitle: Text('Mis en ligne : ${DateFormat("dd/MM/yyyy HH:mm").format(date)}'),
-            onTap: () => lireDocument(url, titre), // ✅ lecture rapide
-            trailing: IconButton(
-              icon: const Icon(Icons.share),
-              tooltip: 'Partager',
-              onPressed: () => partagerDocument(url, titre), // ✅ garder / envoyer
+            contentPadding: EdgeInsets.fromLTRB(10, 0, 15, 10),
+            leading: Padding(
+              padding: const EdgeInsets.only(top: 2.0),
+              child: Icon(Symbols.picture_as_pdf, color: Color(0xFFd50000), size: 30, weight: 600),
             ),
+            titleAlignment: ListTileTitleAlignment.top,
+            title: Text(titre, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+            subtitle: Column(
+              spacing: 10,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text("Paru le ${DateFormat("dd/MM/yyyy à HH:mm").format(date)}", style: const TextStyle(fontSize: 14, fontStyle: FontStyle.italic)),
+                Row(
+                  spacing: 15,
+                  children: [
+                    Spacer(),
+                    Container(
+                      height: 40,
+                      width: 40,
+                      decoration: BoxDecoration(color: Color(0xFF00796B).withAlpha(200), shape: BoxShape.circle),
+                      child: IconButton(
+                        icon: Icon(Symbols.visibility, color: Colors.white, size: 20, weight: 700),
+                        tooltip: 'Ouvrir',
+                        onPressed: () => lireDocument(url, titre), // ✅ lecture rapide
+                      ),
+                    ),
+                    Container(
+                      height: 40,
+                      width: 40,
+                      decoration: BoxDecoration(color: Color(0xFF0277BD).withAlpha(200), shape: BoxShape.circle),
+                      child: IconButton(
+                        icon: Icon(Symbols.share, color: Colors.white, size: 20),
+                        tooltip: 'Partager',
+                        onPressed: () => partagerDocument(url, titre), // ✅ garder / envoyer
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            onTap: () => lireDocument(url, titre), // ✅ lecture rapide
           ),
         );
       },

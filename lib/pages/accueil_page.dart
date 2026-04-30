@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:focus_detector_v2/focus_detector_v2.dart';
 import 'package:http/http.dart' as http;
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:sarrazi_asso_clean/main.dart';
 import 'package:sarrazi_asso_clean/pages/agenda_page.dart';
 import 'package:sarrazi_asso_clean/pages/annonces_page.dart';
@@ -26,7 +27,6 @@ class AccueilPage extends StatefulWidget {
 
 class _AccueilPageState extends State<AccueilPage> {
   static const String _baseUrl = 'https://www.association-sarrazi.fr/';
-
   String? utilisateur;
   Map<String, dynamic>? bandeauMaj;
   bool chargementBandeau = true;
@@ -282,7 +282,7 @@ class _AccueilPageState extends State<AccueilPage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Expanded(
-              child: Text(message, style: const TextStyle(fontSize: 13), maxLines: 5, overflow: TextOverflow.ellipsis),
+              child: Text(message, style: const TextStyle(fontSize: 14), maxLines: 5, overflow: TextOverflow.ellipsis),
             ),
             Icon(Icons.download),
           ],
@@ -308,7 +308,7 @@ class _AccueilPageState extends State<AccueilPage> {
           decoration: BoxDecoration(
             color: color,
             borderRadius: BorderRadius.circular(12.0),
-            boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(2, 2))],
+            //boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(2, 2))],
           ),
           padding: const EdgeInsets.all(6),
           child: Column(
@@ -323,8 +323,7 @@ class _AccueilPageState extends State<AccueilPage> {
                         child: Icon(Icons.lock, size: 16.0, color: Colors.white),
                       ),
                     )
-                  : const SizedBox(height: 16),
-              const SizedBox(height: 4),
+                  : const SizedBox(height: 20),
               Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 spacing: 10,

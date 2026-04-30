@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:sarrazi_asso_clean/extensions/string_extensions.dart';
 import 'package:sarrazi_asso_clean/pages/base_page.dart';
 import 'package:sarrazi_asso_clean/services/http_service.dart';
@@ -24,6 +25,7 @@ class _AnnuairePageState extends State<AnnuairePage> {
   String _message = "";
 
   Future<void> _searchAnnuaire(String query) async {
+    FocusManager.instance.primaryFocus?.unfocus();
     setState(() {
       _isLoading = true;
       _annuaire = [];
@@ -66,31 +68,55 @@ class _AnnuairePageState extends State<AnnuairePage> {
 
   @override
   Widget build(BuildContext context) {
-    return BasePage(title: "Annuaire", body: getBody());
+    return BasePage(title: "Annuaire", body: getBody(), message: "Si vous souhaitez modifier vos coordonnées, n'hésitez pas à nous contacter !", withContact: true);
   }
 
   Widget getBody() {
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 10,
         children: [
-          TextField(
-            controller: _searchController,
-            decoration: InputDecoration(
-              hintText: 'Rechercher par nom, rue...',
-              prefixIcon: Icon(Icons.search),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-              filled: true,
-              contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            ),
-            onSubmitted: _searchAnnuaire,
+          Row(
+            spacing: 5,
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Rechercher par nom, rue...',
+                    hintStyle: TextStyle(fontSize: 14),
+                    //  prefixIcon: Icon(Icons.search, size: 25),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.pink, width: 0.5),
+                    ),
+                    filled: true,
+                    contentPadding: EdgeInsets.symmetric(horizontal: 5, vertical: 14),
+                  ),
+                  onSubmitted: _searchAnnuaire,
+                ),
+              ),
+              ElevatedButton.icon(
+                onPressed: () => _searchAnnuaire(_searchController.text),
+                // icon: const Icon(Symbols.search, color: Colors.white, size: 25),
+                label: Text('Rechercher', style: TextStyle(color: Colors.white, fontSize: 14)),
+                style: ButtonStyle(
+                  padding: WidgetStatePropertyAll(EdgeInsetsGeometry.symmetric(horizontal: 10, vertical: 14.5)),
+                  elevation: WidgetStatePropertyAll(3),
+                  backgroundColor: WidgetStatePropertyAll(Colors.blue[800]),
+                  shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10)))),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 20),
+
           Expanded(
             child: _isLoading
                 ? Center(child: CircularProgressIndicator())
                 : _annuaire.isNotEmpty
-                ? ListView.builder(itemCount: _annuaire.length, itemBuilder: (context, index) => _buildMemberCard(_annuaire[index]))
+                ? ListView.builder(itemCount: _annuaire.length, itemBuilder: (context, index) => _buildMemberCard(_annuaire[index], index))
                 : Center(
                     child: Text(_message, style: GoogleFonts.poppins(), textAlign: TextAlign.center),
                   ),
@@ -100,41 +126,68 @@ class _AnnuairePageState extends State<AnnuairePage> {
     );
   }
 
-  Widget _buildMemberCard(dynamic member) {
+  Widget _buildMemberCard(dynamic member, int index) {
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      elevation: 3,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "${member['prenom']?.toString().trim().capitalize()} ${member['nom']?.toString().trim().capitalize()}",
-              style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blue[800]),
-            ),
-            const SizedBox(height: 8),
-            member['numero']?.isNotEmpty ?? false ? _buildInfoRow(Icons.home, "${member['numero']} ${member['rue']}") : _buildInfoRow(Icons.home, "${member['rue']}"),
-            member['mail']?.isNotEmpty
-                ? InkWell(
-                    child: _buildInfoRow(Icons.email, member['mail']),
-                    onTap: () async {
-                      final Email email = Email(recipients: [member['mail']], isHTML: false);
+      child: ListTile(
+        titleAlignment: ListTileTitleAlignment.top,
 
-                      await FlutterEmailSender.send(email);
-                    },
-                  )
-                : SizedBox.shrink(),
-            member['portable']?.isNotEmpty ?? false
-                ? InkWell(
-                    child: _buildInfoRow(Icons.phone, member['portable']),
-                    onTap: () async {
-                      await launchUrl(Uri.parse("tel:${member['portable']}"));
-                    },
-                  )
-                : SizedBox.shrink(),
-          ],
+        title: Padding(
+          padding: const EdgeInsets.only(top: 5),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                spacing: 10,
+                children: [
+                  Container(
+                    height: 40,
+                    margin: EdgeInsets.only(top: 00),
+                    alignment: Alignment.center,
+                    width: 40,
+                    decoration: BoxDecoration(color: Color(((index + 1) * 0.1547 * 0xFFFFFF).toInt()).withAlpha(255), shape: BoxShape.circle),
+                    child: Text(
+                      "${member['prenom'].toString().trim().substring(0, 1).toUpperCase()}${member['nom'].toString().trim().substring(0, 1).toUpperCase()}",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 16),
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      "${member['prenom']?.toString().trim().capitalize()} ${member['nom']?.toString().trim().capitalize()}",
+                      style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blueGrey),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.only(left: 13.0),
+                child: Column(
+                  children: [
+                    member['numero']?.isNotEmpty ?? false ? _buildInfoRow(Icons.home, "${member['numero']} ${member['rue']}") : _buildInfoRow(Icons.home, "${member['rue']}"),
+                    member['mail']?.isNotEmpty
+                        ? InkWell(
+                            child: _buildInfoRow(Icons.email, member['mail']),
+                            onTap: () async {
+                              final Email email = Email(recipients: [member['mail']], isHTML: false);
+
+                              await FlutterEmailSender.send(email);
+                            },
+                          )
+                        : SizedBox.shrink(),
+                    member['portable']?.isNotEmpty ?? false
+                        ? InkWell(
+                            child: _buildInfoRow(Icons.phone, member['portable']),
+                            onTap: () async {
+                              await launchUrl(Uri.parse("tel:${member['portable']}"));
+                            },
+                          )
+                        : SizedBox.shrink(),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

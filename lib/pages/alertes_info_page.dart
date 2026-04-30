@@ -71,9 +71,6 @@ class _AlertesInfoPageState extends State<AlertesInfoPage> {
                           itemBuilder: (context, index) {
                             final actualite = actualites[index];
                             return Card(
-                              margin: EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-                              elevation: 3,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                               child: Padding(
                                 padding: const EdgeInsets.all(16.0),
                                 child: Column(
