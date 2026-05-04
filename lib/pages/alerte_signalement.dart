@@ -390,7 +390,7 @@ class _AlerteSignalementPageState extends State<AlerteSignalementPage> with Sing
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 spacing: 12,
                                 children: [
-                                  Icon(Symbols.error, color: Colors.orange, size: 30, weight: 600),
+                                  Icon(Icons.error, color: Colors.orange, size: 30, weight: 600),
                                   Expanded(
                                     child: Text(
                                       p.titre,

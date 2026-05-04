@@ -150,7 +150,7 @@ class _AjouterAnnoncePageState extends State<AjouterAnnoncePage> {
           // ),
           ElevatedButton.icon(
             onPressed: loading ? null : _envoyerAnnonce,
-            icon: const Icon(Symbols.send, color: Colors.white, size: 25),
+            icon: const Icon(Icons.send, color: Colors.white, size: 25),
             label: Text(loading ? 'Envoi...' : 'Publier l\'annonce', style: TextStyle(color: Colors.white, fontSize: 16)),
             style: ButtonStyle(
               padding: WidgetStatePropertyAll(EdgeInsetsGeometry.all(10)),

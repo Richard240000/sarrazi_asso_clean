@@ -209,7 +209,7 @@ class _AjouterPublicationPageState extends State<AjouterPublicationPage> {
 
                     ElevatedButton.icon(
                       onPressed: _submitting ? null : _submit,
-                      icon: _submitting ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Symbols.send, color: Colors.white, size: 25),
+                      icon: _submitting ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.send, color: Colors.white, size: 25),
                       label: Text(_submitting ? 'Envoi...' : 'Envoyer le signalement', style: TextStyle(color: Colors.white, fontSize: 16)),
                       style: ButtonStyle(
                         padding: WidgetStatePropertyAll(EdgeInsetsGeometry.all(10)),

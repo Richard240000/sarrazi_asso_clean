@@ -117,7 +117,7 @@ class _AnnoncesPagesState extends State<AnnoncesPages> {
                                   children: [
                                     Icon(
                                       categorie == 'don'
-                                          ? Symbols.approval_delegation
+                                          ? Icons.volunteer_activism
                                           : categorie == 'vente'
                                           ? Symbols.sell
                                           : categorie == 'bon plan'

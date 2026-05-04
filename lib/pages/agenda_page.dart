@@ -70,7 +70,7 @@ class _AgendaPageState extends State<AgendaPage> {
               var date = DateTime.tryParse((evt['date_event'] ?? '').toString()) ?? DateTime.now();
               var color = Color(((index + 1) * 0.1547 * 0xFFFFFF).toInt()).withAlpha(255);
               return Padding(
-                padding: const EdgeInsets.fromLTRB(20, 0, 10, 0),
+                padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
                 child: Row(
                   spacing: 20,
                   children: [
@@ -134,7 +134,7 @@ class _AgendaPageState extends State<AgendaPage> {
                                   spacing: 5,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Icon(Symbols.description, size: 20, color: color, weight: 600),
+                                    Icon(Icons.description_outlined, size: 20, color: color, weight: 600),
                                     Expanded(child: Text(evt['description'] ?? '')),
                                   ],
                                 ),

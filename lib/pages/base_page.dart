@@ -104,7 +104,7 @@ class _BasePageState extends State<BasePage> {
         floatingActionButton: widget.floatingButton,
         bottomNavigationBar: widget.isBottomBarVisible
             ? Padding(
-                padding: EdgeInsets.only(bottom: Platform.isAndroid ? kBottomNavigationBarHeight : 0),
+                padding: EdgeInsets.only(bottom: 0),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -297,7 +297,7 @@ class _BasePageState extends State<BasePage> {
                   ],
                 ),
               )
-            : SizedBox.fromSize(),
+            : SizedBox(height: kBottomNavigationBarHeight),
       ),
     );
   }

@@ -155,7 +155,7 @@ class _DocumentsPageState extends State<DocumentsPage> {
             contentPadding: EdgeInsets.fromLTRB(10, 0, 15, 10),
             leading: Padding(
               padding: const EdgeInsets.only(top: 2.0),
-              child: Icon(Symbols.picture_as_pdf, color: Color(0xFFd50000), size: 30, weight: 600),
+              child: Icon(Icons.picture_as_pdf, color: Color(0xFFd50000), size: 30, weight: 600),
             ),
             titleAlignment: ListTileTitleAlignment.top,
             title: Text(titre, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
@@ -183,7 +183,7 @@ class _DocumentsPageState extends State<DocumentsPage> {
                       width: 40,
                       decoration: BoxDecoration(color: Color(0xFF0277BD).withAlpha(200), shape: BoxShape.circle),
                       child: IconButton(
-                        icon: Icon(Symbols.share, color: Colors.white, size: 20),
+                        icon: Icon(Icons.share, color: Colors.white, size: 20),
                         tooltip: 'Partager',
                         onPressed: () => partagerDocument(url, titre), // ✅ garder / envoyer
                       ),
