@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:sarrazi_asso_clean/extensions/string_extensions.dart';
 import 'package:sarrazi_asso_clean/pages/base_page.dart';
 import 'package:sarrazi_asso_clean/services/http_service.dart';
 import 'package:sarrazi_asso_clean/services/popup_service.dart';
@@ -63,7 +64,7 @@ class _ArtisansPageState extends State<ArtisansPage> {
             itemBuilder: (context, index) {
               final artisan = artisans[index];
               var titreArtisan = artisan['intitule'].toString().split(':').sublist(1).join('').trim();
-              titreArtisan = titreArtisan.substring(0, 1).toUpperCase() + titreArtisan.substring(1);
+              titreArtisan = titreArtisan.capitalize();
               var descriptionArtisan = artisan['intitule'].split(':')[0].toString().trim();
               return Card(
                 margin: EdgeInsets.symmetric(horizontal: 8, vertical: 8),

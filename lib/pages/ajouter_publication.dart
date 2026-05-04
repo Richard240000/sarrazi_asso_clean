@@ -12,7 +12,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:material_symbols_icons/symbols.dart';
 import 'package:sarrazi_asso_clean/pages/base_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

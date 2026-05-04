@@ -1,10 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:focus_detector_v2/focus_detector_v2.dart';
-import 'package:material_symbols_icons/symbols.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:sarrazi_asso_clean/main.dart';
 import 'package:sarrazi_asso_clean/pages/agenda_page.dart';
 import 'package:sarrazi_asso_clean/pages/annonces_page.dart';
@@ -104,7 +101,7 @@ class _BasePageState extends State<BasePage> {
         floatingActionButton: widget.floatingButton,
         bottomNavigationBar: widget.isBottomBarVisible
             ? Padding(
-                padding: EdgeInsets.only(bottom: 0),
+                padding: EdgeInsets.only(bottom: Platform.isAndroid ? MediaQuery.paddingOf(context).bottom : 0),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -220,12 +217,9 @@ class _BasePageState extends State<BasePage> {
                                     PopupMenuItem<String>(
                                       value: '-',
                                       child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.end,
+                                        mainAxisAlignment: MainAxisAlignment.center,
                                         spacing: 10,
-                                        children: [
-                                          Text(version ?? '', style: TextStyle(color: Colors.white)),
-                                          Icon(Symbols.deployed_code, size: 25, color: Colors.white),
-                                        ],
+                                        children: [Text("Version ${version ?? ''}", style: TextStyle(color: Colors.white))],
                                       ),
                                     ),
                                   ],

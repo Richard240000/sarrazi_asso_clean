@@ -1,9 +1,6 @@
-import 'dart:math';
-
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:sarrazi_asso_clean/pages/base_page.dart';
 import 'package:sarrazi_asso_clean/services/http_service.dart';
 import 'package:sarrazi_asso_clean/services/popup_service.dart';
@@ -72,30 +69,33 @@ class _AgendaPageState extends State<AgendaPage> {
               return Padding(
                 padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
                 child: Row(
-                  spacing: 20,
+                  spacing: 10,
                   children: [
-                    Column(
-                      children: [
-                        Text(
-                          "${DateFormat("E", 'fr').format(date)}",
-                          style: TextStyle(color: color, fontWeight: FontWeight.w600),
-                        ),
-                        Container(
-                          height: 40,
-                          width: 40,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-                          child: Text("${date.day}", style: TextStyle(color: Colors.white)),
-                        ),
-                        Text(
-                          "${DateFormat("MMM", 'fr').format(date)}",
-                          style: TextStyle(color: color, fontWeight: FontWeight.w600),
-                        ),
-                        Text(
-                          "${DateFormat("yy", 'fr').format(date)}",
-                          style: TextStyle(color: color, fontWeight: FontWeight.w600),
-                        ),
-                      ],
+                    Transform.translate(
+                      offset: Offset(0, -10),
+                      child: Column(
+                        children: [
+                          Text(
+                            DateFormat("E", 'fr').format(date),
+                            style: TextStyle(color: color, fontWeight: FontWeight.w600),
+                          ),
+                          Container(
+                            height: 40,
+                            width: 40,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+                            child: Text("${date.day}", style: TextStyle(color: Colors.white, fontSize: 16)),
+                          ),
+                          Text(
+                            DateFormat("MMM", 'fr').format(date),
+                            style: TextStyle(color: color, fontWeight: FontWeight.w600),
+                          ),
+                          Text(
+                            DateFormat("yy", 'fr').format(date),
+                            style: TextStyle(color: color, fontWeight: FontWeight.w600),
+                          ),
+                        ],
+                      ),
                     ),
                     Expanded(
                       child: Card(
@@ -118,16 +118,16 @@ class _AgendaPageState extends State<AgendaPage> {
                                   spacing: 5,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Icon(Symbols.calendar_check, size: 20, color: color, weight: 600),
-                                    Expanded(child: Text("Le ${DateFormat("dd/MM/yyyy à HH:mm").format(date)}")),
+                                    Icon(Icons.calendar_month_outlined, size: 20, color: color, weight: 600),
+                                    Expanded(child: Text("Le ${DateFormat("dd/MM/yyyy à HH:mm").format(date)}", style: TextStyle(fontSize: 15))),
                                   ],
                                 ),
                                 Row(
                                   spacing: 5,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Icon(Symbols.location_on, size: 20, color: color, weight: 600),
-                                    Expanded(child: Text(evt['lieu'] ?? 'Lieu non précisé')),
+                                    Icon(Icons.location_on_outlined, size: 20, color: color, weight: 600),
+                                    Expanded(child: Text(evt['lieu'] ?? 'Lieu non précisé', style: TextStyle(fontSize: 15))),
                                   ],
                                 ),
                                 Row(
@@ -135,7 +135,7 @@ class _AgendaPageState extends State<AgendaPage> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Icon(Icons.description_outlined, size: 20, color: color, weight: 600),
-                                    Expanded(child: Text(evt['description'] ?? '')),
+                                    Expanded(child: Text(evt['description'] ?? '', style: TextStyle(fontSize: 15))),
                                   ],
                                 ),
                               ],

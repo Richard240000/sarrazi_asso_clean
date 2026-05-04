@@ -4,7 +4,6 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:sarrazi_asso_clean/pages/base_page.dart';
 
@@ -178,7 +177,7 @@ class _AssociationPageState extends State<AssociationPage> {
         children: [
           ElevatedButton.icon(
             onPressed: _sendEmail,
-            icon: const Icon(Symbols.mail, color: Colors.white, size: 25),
+            icon: const Icon(Icons.mail_outline, color: Colors.white, size: 25),
             label: const Text("Nous écrire", style: TextStyle(color: Colors.white, fontSize: 18)),
             style: ButtonStyle(
               elevation: WidgetStatePropertyAll(5),

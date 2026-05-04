@@ -2,7 +2,7 @@ name: sarrazi_asso_clean
 description: "A new Flutter project."
 
 publish_to: 'none'
-version: 1.2.0+1200
+version: 1.2.0+1201
 
 environment:
   sdk: ^3.9.0
@@ -37,7 +37,6 @@ dependencies:
   flutter_email_sender: ^8.0.0
   internet_connection_checker_plus: ^2.9.0
   package_info_plus: ^9.0.1
-  material_symbols_icons: ^4.2928.1
   collection: ^1.19.1
   flutter_map: ^8.3.0
   latlong2: ^0.9.1

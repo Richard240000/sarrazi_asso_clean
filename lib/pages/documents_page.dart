@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:material_symbols_icons/symbols.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sarrazi_asso_clean/pages/base_page.dart';
@@ -111,8 +110,6 @@ class _DocumentsPageState extends State<DocumentsPage> {
   Future<void> partagerDocument(String url, String titre) async {
     if (_busy) return;
     _busy = true;
-
-    setState(() => isLoading = true);
     try {
       if (url.trim().isEmpty) {
         _snack("Lien du document manquant.");
@@ -120,13 +117,11 @@ class _DocumentsPageState extends State<DocumentsPage> {
       }
 
       final localPath = await _getLocalPdfPath(url: url, fileName: '$titre.pdf');
-
-      await Share.shareXFiles([XFile(localPath)], text: "Document : $titre");
-    } catch (_) {
+      await SharePlus.instance.share(ShareParams(sharePositionOrigin: Rect.fromLTWH(0, 0, 1, 1), files: [XFile(localPath)], title: titre));
+    } on Exception catch (e) {
       if (!mounted) return;
       _snack("Erreur : impossible de partager le document.");
     } finally {
-      if (mounted) setState(() => isLoading = false);
       _busy = false;
     }
   }
@@ -173,7 +168,7 @@ class _DocumentsPageState extends State<DocumentsPage> {
                       width: 40,
                       decoration: BoxDecoration(color: Color(0xFF00796B).withAlpha(200), shape: BoxShape.circle),
                       child: IconButton(
-                        icon: Icon(Symbols.visibility, color: Colors.white, size: 20, weight: 700),
+                        icon: Icon(Icons.visibility_outlined, color: Colors.white, size: 20, weight: 700),
                         tooltip: 'Ouvrir',
                         onPressed: () => lireDocument(url, titre), // ✅ lecture rapide
                       ),
@@ -183,7 +178,7 @@ class _DocumentsPageState extends State<DocumentsPage> {
                       width: 40,
                       decoration: BoxDecoration(color: Color(0xFF0277BD).withAlpha(200), shape: BoxShape.circle),
                       child: IconButton(
-                        icon: Icon(Icons.share, color: Colors.white, size: 20),
+                        icon: Icon(Icons.share_outlined, color: Colors.white, size: 20),
                         tooltip: 'Partager',
                         onPressed: () => partagerDocument(url, titre), // ✅ garder / envoyer
                       ),

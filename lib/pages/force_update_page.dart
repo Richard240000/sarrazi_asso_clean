@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:material_symbols_icons/symbols.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:io';
 
@@ -28,7 +27,7 @@ class ForceUpdatePage extends StatelessWidget {
               SizedBox(height: 30),
               ElevatedButton.icon(
                 onPressed: openStore,
-                icon: const Icon(Symbols.download, color: Colors.white, size: 25),
+                icon: const Icon(Icons.download, color: Colors.white, size: 25),
                 label: Text('Mettre à jour', style: TextStyle(color: Colors.white, fontSize: 16)),
                 style: ButtonStyle(
                   padding: WidgetStatePropertyAll(EdgeInsetsGeometry.symmetric(horizontal: 20, vertical: 10)),

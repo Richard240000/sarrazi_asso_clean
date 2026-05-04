@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:material_symbols_icons/symbols.dart';
 import 'package:mime/mime.dart';
 import 'package:sarrazi_asso_clean/pages/base_page.dart';
 import 'package:sarrazi_asso_clean/main.dart';

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sarrazi_asso_clean/services/http_service.dart';
@@ -53,7 +55,14 @@ class _LoginBottomSheetState extends State<LoginBottomSheet> {
         Container(
           color: Colors.blue[800],
           child: Padding(
-            padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom < 100 ? kBottomNavigationBarHeight : MediaQuery.of(context).viewInsets.bottom),
+            //padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom < 100 ? kBottomNavigationBarHeight : MediaQuery.of(context).viewInsets.bottom),
+            padding: EdgeInsetsGeometry.only(
+              bottom: Platform.isAndroid && MediaQuery.of(context).viewInsets.bottom < 100
+                  ? MediaQuery.paddingOf(context).bottom
+                  : MediaQuery.of(context).viewInsets.bottom < 100
+                  ? kBottomNavigationBarHeight
+                  : MediaQuery.of(context).viewInsets.bottom,
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:sarrazi_asso_clean/main.dart';
 import 'package:sarrazi_asso_clean/pages/ajouter_annonce_page.dart';
 import 'package:sarrazi_asso_clean/pages/base_page.dart';
@@ -119,12 +118,12 @@ class _AnnoncesPagesState extends State<AnnoncesPages> {
                                       categorie == 'don'
                                           ? Icons.volunteer_activism
                                           : categorie == 'vente'
-                                          ? Symbols.sell
+                                          ? Icons.sell_outlined
                                           : categorie == 'bon plan'
-                                          ? Symbols.thumb_up
+                                          ? Icons.thumb_up_outlined
                                           : categorie == 'service'
-                                          ? Symbols.real_estate_agent
-                                          : Symbols.campaign,
+                                          ? Icons.real_estate_agent_outlined
+                                          : Icons.campaign_outlined,
                                       size: 25,
                                       color: Colors.white,
                                     ),

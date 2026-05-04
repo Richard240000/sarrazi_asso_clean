@@ -1,10 +1,7 @@
-import 'dart:convert';
-
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:http/http.dart' as http;
-import 'package:material_symbols_icons/symbols.dart';
 import 'package:sarrazi_asso_clean/extensions/string_extensions.dart';
 import 'package:sarrazi_asso_clean/pages/base_page.dart';
 import 'package:sarrazi_asso_clean/services/http_service.dart';
@@ -22,7 +19,7 @@ class _AnnuairePageState extends State<AnnuairePage> {
   final TextEditingController _searchController = TextEditingController();
   List<dynamic> _annuaire = [];
   bool _isLoading = false;
-  String _message = "";
+  String _message = '';
 
   Future<void> _searchAnnuaire(String query) async {
     FocusManager.instance.primaryFocus?.unfocus();
@@ -161,7 +158,7 @@ class _AnnuairePageState extends State<AnnuairePage> {
               ),
               const SizedBox(height: 8),
               Padding(
-                padding: const EdgeInsets.only(left: 13.0),
+                padding: const EdgeInsets.only(left: 11.0),
                 child: Column(
                   children: [
                     member['numero']?.isNotEmpty ?? false ? _buildInfoRow(Icons.home, "${member['numero']} ${member['rue']}") : _buildInfoRow(Icons.home, "${member['rue']}"),

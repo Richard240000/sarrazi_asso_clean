@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -31,7 +32,7 @@ void main() async {
 
   try {
     version = (await PackageInfo.fromPlatform()).version;
-
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     await flutterLocalNotificationsPlugin.initialize(initializationSettings);
 
     await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(

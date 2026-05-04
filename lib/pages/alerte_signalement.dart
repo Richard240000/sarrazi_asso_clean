@@ -1,13 +1,15 @@
 import 'dart:convert';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'package:material_symbols_icons/symbols.dart';
 import 'package:sarrazi_asso_clean/extensions/string_extensions.dart';
 import 'package:sarrazi_asso_clean/main.dart';
 import 'package:sarrazi_asso_clean/widgets/login_bottom_sheet.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sarrazi_asso_clean/pages/base_page.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'ajouter_publication.dart';
 
@@ -211,6 +213,58 @@ class _AlerteSignalementPageState extends State<AlerteSignalementPage> with Sing
     }
   }
 
+  Widget _buildTextWithLinks(String text) {
+    final urlRegex = RegExp(r'(https?:\/\/[^\s]+)');
+    final spans = <TextSpan>[];
+
+    int start = 0;
+
+    for (final match in urlRegex.allMatches(text)) {
+      if (match.start > start) {
+        spans.add(
+          TextSpan(
+            text: text.substring(start, match.start),
+            style: const TextStyle(fontSize: 15, color: Colors.black87),
+          ),
+        );
+      }
+
+      final url = match.group(0)!;
+
+      spans.add(
+        TextSpan(
+          text: url,
+          style: const TextStyle(fontSize: 15, color: Colors.blue, decoration: TextDecoration.underline),
+          recognizer: TapGestureRecognizer()
+            ..onTap = () async {
+              final uri = Uri.parse(url);
+
+              try {
+                await launchUrl(uri, mode: LaunchMode.externalApplication);
+              } catch (e) {
+                debugPrint("Erreur ouverture URL : $e");
+              }
+            },
+        ),
+      );
+
+      start = match.end;
+    }
+
+    if (start < text.length) {
+      spans.add(
+        TextSpan(
+          text: text.substring(start),
+          style: const TextStyle(fontSize: 15, color: Colors.black87),
+        ),
+      );
+    }
+
+    return RichText(
+      text: TextSpan(children: spans, style: GoogleFonts.poppins().copyWith(fontSize: 15)),
+    );
+  }
+
   Widget _buildAlertesBody() {
     if (_loadingUser) {
       return const Center(child: CircularProgressIndicator());
@@ -296,9 +350,10 @@ class _AlerteSignalementPageState extends State<AlerteSignalementPage> with Sing
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Column(
+                          spacing: 10,
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            Text(a.texte, style: const TextStyle(fontSize: 15)),
+                            _buildTextWithLinks(a.texte),
                             Text('Par : ${a.nom.isEmpty ? "Administration" : a.nom} • ${_formatDate(a.dateAjout)}', style: const TextStyle(fontSize: 12, color: Colors.black45)),
                           ],
                         ),
@@ -390,7 +445,7 @@ class _AlerteSignalementPageState extends State<AlerteSignalementPage> with Sing
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 spacing: 12,
                                 children: [
-                                  Icon(Icons.error, color: Colors.orange, size: 30, weight: 600),
+                                  Icon(Icons.error_outline, color: Colors.orange, size: 30, weight: 600),
                                   Expanded(
                                     child: Text(
                                       p.titre,
