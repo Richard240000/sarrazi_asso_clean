@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:sarrazi_asso_clean/main.dart';
 import 'package:sarrazi_asso_clean/pages/ajouter_annonce_page.dart';
+import 'package:sarrazi_asso_clean/pages/alerte_signalement.dart';
 import 'package:sarrazi_asso_clean/pages/base_page.dart';
 import 'package:sarrazi_asso_clean/services/http_service.dart';
 import 'package:sarrazi_asso_clean/services/popup_service.dart';
@@ -178,7 +179,7 @@ class _AnnoncesPagesState extends State<AnnoncesPages> {
                               child: Column(
                                 spacing: 10,
                                 children: [
-                                  Text(a['description'] ?? ''),
+                                  buildTextWithLinks(a['description'] ?? ''),
                                   Text("Publié par ${a['auteur_nom'] ?? 'Inconnu'} le $formattedDate", style: TextStyle(fontSize: 12, color: Colors.grey[600])),
                                 ],
                               ),

@@ -213,58 +213,6 @@ class _AlerteSignalementPageState extends State<AlerteSignalementPage> with Sing
     }
   }
 
-  Widget _buildTextWithLinks(String text) {
-    final urlRegex = RegExp(r'(https?:\/\/[^\s]+)');
-    final spans = <TextSpan>[];
-
-    int start = 0;
-
-    for (final match in urlRegex.allMatches(text)) {
-      if (match.start > start) {
-        spans.add(
-          TextSpan(
-            text: text.substring(start, match.start),
-            style: const TextStyle(fontSize: 15, color: Colors.black87),
-          ),
-        );
-      }
-
-      final url = match.group(0)!;
-
-      spans.add(
-        TextSpan(
-          text: url,
-          style: const TextStyle(fontSize: 15, color: Colors.blue, decoration: TextDecoration.underline),
-          recognizer: TapGestureRecognizer()
-            ..onTap = () async {
-              final uri = Uri.parse(url);
-
-              try {
-                await launchUrl(uri, mode: LaunchMode.externalApplication);
-              } catch (e) {
-                debugPrint("Erreur ouverture URL : $e");
-              }
-            },
-        ),
-      );
-
-      start = match.end;
-    }
-
-    if (start < text.length) {
-      spans.add(
-        TextSpan(
-          text: text.substring(start),
-          style: const TextStyle(fontSize: 15, color: Colors.black87),
-        ),
-      );
-    }
-
-    return RichText(
-      text: TextSpan(children: spans, style: GoogleFonts.poppins().copyWith(fontSize: 15)),
-    );
-  }
-
   Widget _buildAlertesBody() {
     if (_loadingUser) {
       return const Center(child: CircularProgressIndicator());
@@ -353,7 +301,7 @@ class _AlerteSignalementPageState extends State<AlerteSignalementPage> with Sing
                           spacing: 10,
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            _buildTextWithLinks(a.texte),
+                            buildTextWithLinks(a.texte),
                             Text('Par : ${a.nom.isEmpty ? "Administration" : a.nom} • ${_formatDate(a.dateAjout)}', style: const TextStyle(fontSize: 12, color: Colors.black45)),
                           ],
                         ),
@@ -430,7 +378,6 @@ class _AlerteSignalementPageState extends State<AlerteSignalementPage> with Sing
                   itemCount: items.length,
                   itemBuilder: (context, i) {
                     final p = items[i];
-
                     return Padding(
                       padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
                       child: Card(
@@ -502,8 +449,7 @@ class _AlerteSignalementPageState extends State<AlerteSignalementPage> with Sing
                                     ),
                                 ],
                               ),
-
-                              Text(p.description, maxLines: 4, overflow: TextOverflow.ellipsis),
+                              buildTextWithLinks(p.description),
                               Text('Par : ${p.auteurNom.isEmpty ? "—" : p.auteurNom} • ${_formatDate(p.createdAt)}', style: const TextStyle(fontSize: 12, color: Colors.black54)),
                               Align(
                                 alignment: Alignment.centerRight,
@@ -703,6 +649,58 @@ class _ErrorView extends StatelessWidget {
       ),
     );
   }
+}
+
+Widget buildTextWithLinks(String text) {
+  final urlRegex = RegExp(r'(https?:\/\/[^\s]+)');
+  final spans = <TextSpan>[];
+
+  int start = 0;
+
+  for (final match in urlRegex.allMatches(text)) {
+    if (match.start > start) {
+      spans.add(
+        TextSpan(
+          text: text.substring(start, match.start),
+          style: const TextStyle(fontSize: 15, color: Colors.black87),
+        ),
+      );
+    }
+
+    final url = match.group(0)!;
+
+    spans.add(
+      TextSpan(
+        text: url,
+        style: const TextStyle(fontSize: 15, color: Colors.blue, decoration: TextDecoration.underline),
+        recognizer: TapGestureRecognizer()
+          ..onTap = () async {
+            final uri = Uri.parse(url);
+
+            try {
+              await launchUrl(uri, mode: LaunchMode.externalApplication);
+            } catch (e) {
+              debugPrint("Erreur ouverture URL : $e");
+            }
+          },
+      ),
+    );
+
+    start = match.end;
+  }
+
+  if (start < text.length) {
+    spans.add(
+      TextSpan(
+        text: text.substring(start),
+        style: const TextStyle(fontSize: 15, color: Colors.black87),
+      ),
+    );
+  }
+
+  return RichText(
+    text: TextSpan(children: spans, style: GoogleFonts.poppins().copyWith(fontSize: 15)),
+  );
 }
 
 class AlerteItem {
