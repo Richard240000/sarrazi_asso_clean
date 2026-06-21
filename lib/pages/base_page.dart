@@ -8,12 +8,22 @@ import 'package:sarrazi_asso_clean/pages/annonces_page.dart';
 import 'package:sarrazi_asso_clean/pages/annuaire_page.dart';
 import 'package:sarrazi_asso_clean/pages/artisans_page.dart';
 import 'package:sarrazi_asso_clean/pages/documents_page.dart';
-import 'package:sarrazi_asso_clean/widgets/login_bottom_sheet.dart';
 import 'package:sarrazi_asso_clean/pages/association_page.dart';
 import 'package:sarrazi_asso_clean/pages/alerte_signalement.dart';
+import 'package:sarrazi_asso_clean/pages/phototheque_page.dart';
+import 'package:sarrazi_asso_clean/widgets/login_bottom_sheet.dart';
 
 class BasePage extends StatefulWidget {
-  const BasePage({super.key, required this.title, required this.body, this.isHome = false, this.floatingButton, this.isBottomBarVisible = true, this.message, this.withContact = false});
+  const BasePage({
+    super.key,
+    required this.title,
+    required this.body,
+    this.isHome = false,
+    this.floatingButton,
+    this.isBottomBarVisible = true,
+    this.message,
+    this.withContact = false,
+  });
 
   final String title;
   final Widget body;
@@ -71,7 +81,14 @@ class _BasePageState extends State<BasePage> {
             Expanded(child: widget.body),
             widget.message?.isNotEmpty ?? false
                 ? GestureDetector(
-                    onTap: widget.withContact ? () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AssociationPage())) : () {},
+                    onTap: widget.withContact
+                        ? () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const AssociationPage(),
+                              ),
+                            )
+                        : () {},
                     child: Container(
                       color: Colors.blue.withAlpha(20),
                       child: Padding(
@@ -87,7 +104,13 @@ class _BasePageState extends State<BasePage> {
                             widget.withContact
                                 ? InkWell(
                                     child: Icon(Icons.mail, color: Colors.indigo),
-                                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AssociationPage())),
+                                    onTap: () => Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const AssociationPage(),
+                                      ),
+                                    ),
                                   )
                                 : SizedBox.shrink(),
                           ],
@@ -101,7 +124,11 @@ class _BasePageState extends State<BasePage> {
         floatingActionButton: widget.floatingButton,
         bottomNavigationBar: widget.isBottomBarVisible
             ? Padding(
-                padding: EdgeInsets.only(bottom: Platform.isAndroid ? MediaQuery.paddingOf(context).bottom : 0),
+                padding: EdgeInsets.only(
+                  bottom: Platform.isAndroid
+                      ? MediaQuery.paddingOf(context).bottom
+                      : 0,
+                ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -118,8 +145,20 @@ class _BasePageState extends State<BasePage> {
                               },
                               icon: Column(
                                 children: [
-                                  Icon(Icons.home, color: widget.isHome ? Colors.blue[800] : const Color(0xff424242)),
-                                  Text("Accueil", style: TextStyle(color: widget.isHome ? Colors.blue[800] : const Color(0xff424242))),
+                                  Icon(
+                                    Icons.home,
+                                    color: widget.isHome
+                                        ? Colors.blue[800]
+                                        : const Color(0xff424242),
+                                  ),
+                                  Text(
+                                    "Accueil",
+                                    style: TextStyle(
+                                      color: widget.isHome
+                                          ? Colors.blue[800]
+                                          : const Color(0xff424242),
+                                    ),
+                                  ),
                                 ],
                               ),
                               label: const Text(""),
@@ -129,11 +168,26 @@ class _BasePageState extends State<BasePage> {
                             child: TextButton.icon(
                               key: _menuKey,
                               onPressed: () async {
-                                final RenderBox button = _menuKey.currentContext!.findRenderObject() as RenderBox;
-                                final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+                                final RenderBox button =
+                                    _menuKey.currentContext!
+                                        .findRenderObject() as RenderBox;
+                                final RenderBox overlay =
+                                    Overlay.of(context)
+                                        .context
+                                        .findRenderObject() as RenderBox;
 
-                                final RelativeRect position = RelativeRect.fromRect(
-                                  Rect.fromPoints(button.localToGlobal(Offset.zero, ancestor: overlay), button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay)),
+                                final RelativeRect position =
+                                    RelativeRect.fromRect(
+                                  Rect.fromPoints(
+                                    button.localToGlobal(
+                                      Offset.zero,
+                                      ancestor: overlay,
+                                    ),
+                                    button.localToGlobal(
+                                      button.size.bottomRight(Offset.zero),
+                                      ancestor: overlay,
+                                    ),
+                                  ),
                                   Offset.zero & overlay.size,
                                 );
 
@@ -147,8 +201,13 @@ class _BasePageState extends State<BasePage> {
                                       child: Row(
                                         spacing: 10,
                                         children: [
-                                          Icon(Icons.groups, size: 25, color: Colors.white),
-                                          Text('L\'association', style: TextStyle(color: Colors.white)),
+                                          Icon(Icons.groups,
+                                              size: 25, color: Colors.white),
+                                          Text(
+                                            'L\'association',
+                                            style:
+                                                TextStyle(color: Colors.white),
+                                          ),
                                         ],
                                       ),
                                     ),
@@ -157,8 +216,13 @@ class _BasePageState extends State<BasePage> {
                                       child: Row(
                                         spacing: 10,
                                         children: [
-                                          Icon(Icons.notifications_active, size: 25, color: Colors.white),
-                                          Text('Alertes & Signalements', style: TextStyle(color: Colors.white)),
+                                          Icon(Icons.notifications_active,
+                                              size: 25, color: Colors.white),
+                                          Text(
+                                            'Alertes & Signalements',
+                                            style:
+                                                TextStyle(color: Colors.white),
+                                          ),
                                         ],
                                       ),
                                     ),
@@ -167,9 +231,15 @@ class _BasePageState extends State<BasePage> {
                                       child: Row(
                                         spacing: 10,
                                         children: [
-                                          Icon(Icons.picture_as_pdf, size: 25, color: Colors.white),
-                                          Text('Documents', style: TextStyle(color: Colors.white)),
-                                          Icon(Icons.lock, size: 15, color: Colors.white),
+                                          Icon(Icons.picture_as_pdf,
+                                              size: 25, color: Colors.white),
+                                          Text(
+                                            'Documents',
+                                            style:
+                                                TextStyle(color: Colors.white),
+                                          ),
+                                          Icon(Icons.lock,
+                                              size: 15, color: Colors.white),
                                         ],
                                       ),
                                     ),
@@ -178,9 +248,15 @@ class _BasePageState extends State<BasePage> {
                                       child: Row(
                                         spacing: 10,
                                         children: [
-                                          Icon(Icons.contact_phone, size: 25, color: Colors.white),
-                                          Text('Annuaire', style: TextStyle(color: Colors.white)),
-                                          Icon(Icons.lock, size: 15, color: Colors.white),
+                                          Icon(Icons.contact_phone,
+                                              size: 25, color: Colors.white),
+                                          Text(
+                                            'Annuaire',
+                                            style:
+                                                TextStyle(color: Colors.white),
+                                          ),
+                                          Icon(Icons.lock,
+                                              size: 15, color: Colors.white),
                                         ],
                                       ),
                                     ),
@@ -189,8 +265,13 @@ class _BasePageState extends State<BasePage> {
                                       child: Row(
                                         spacing: 10,
                                         children: [
-                                          Icon(Icons.event, size: 25, color: Colors.white),
-                                          Text('Agenda', style: TextStyle(color: Colors.white)),
+                                          Icon(Icons.event,
+                                              size: 25, color: Colors.white),
+                                          Text(
+                                            'Agenda',
+                                            style:
+                                                TextStyle(color: Colors.white),
+                                          ),
                                         ],
                                       ),
                                     ),
@@ -199,8 +280,13 @@ class _BasePageState extends State<BasePage> {
                                       child: Row(
                                         spacing: 10,
                                         children: [
-                                          Icon(Icons.handyman, size: 25, color: Colors.white),
-                                          Text('Artisans', style: TextStyle(color: Colors.white)),
+                                          Icon(Icons.handyman,
+                                              size: 25, color: Colors.white),
+                                          Text(
+                                            'Artisans',
+                                            style:
+                                                TextStyle(color: Colors.white),
+                                          ),
                                         ],
                                       ),
                                     ),
@@ -209,17 +295,44 @@ class _BasePageState extends State<BasePage> {
                                       child: Row(
                                         spacing: 10,
                                         children: [
-                                          Icon(Icons.announcement, size: 25, color: Colors.white),
-                                          Text('Annonces', style: TextStyle(color: Colors.white)),
+                                          Icon(Icons.announcement,
+                                              size: 25, color: Colors.white),
+                                          Text(
+                                            'Annonces',
+                                            style:
+                                                TextStyle(color: Colors.white),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    const PopupMenuItem<String>(
+                                      value: 'Phototheque',
+                                      child: Row(
+                                        spacing: 10,
+                                        children: [
+                                          Icon(Icons.photo_library,
+                                              size: 25, color: Colors.white),
+                                          Text(
+                                            'Photothèque',
+                                            style:
+                                                TextStyle(color: Colors.white),
+                                          ),
                                         ],
                                       ),
                                     ),
                                     PopupMenuItem<String>(
                                       value: '-',
                                       child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
                                         spacing: 10,
-                                        children: [Text("Version ${version ?? ''}", style: TextStyle(color: Colors.white))],
+                                        children: [
+                                          Text(
+                                            "Version ${version ?? ''}",
+                                            style: TextStyle(
+                                                color: Colors.white),
+                                          ),
+                                        ],
                                       ),
                                     ),
                                   ],
@@ -230,56 +343,118 @@ class _BasePageState extends State<BasePage> {
 
                                 switch (result) {
                                   case "Alerte-Signalement":
-                                    Navigator.push(context, MaterialPageRoute(builder: (context) => const AlerteSignalementPage()));
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const AlerteSignalementPage(),
+                                      ),
+                                    );
                                     break;
 
                                   case "Documents":
                                     if (utilisateur?.isEmpty ?? true) {
-                                      await showModalBottomSheet(context: context, builder: (context) => LoginBottomSheet(), isScrollControlled: true);
+                                      await showModalBottomSheet(
+                                        context: context,
+                                        builder: (context) => LoginBottomSheet(),
+                                        isScrollControlled: true,
+                                      );
                                       setState(() {
-                                        utilisateur = sharedPreferences.getString('nom');
+                                        utilisateur =
+                                            sharedPreferences.getString('nom');
                                       });
                                     }
                                     if (utilisateur?.isNotEmpty ?? false) {
                                       if (!context.mounted) return;
-                                      Navigator.push(context, MaterialPageRoute(builder: (context) => DocumentsPage()));
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => DocumentsPage(),
+                                        ),
+                                      );
                                     }
                                     break;
 
                                   case "Annuaire":
                                     if (utilisateur?.isEmpty ?? true) {
-                                      await showModalBottomSheet(context: context, builder: (context) => LoginBottomSheet(), isScrollControlled: true);
+                                      await showModalBottomSheet(
+                                        context: context,
+                                        builder: (context) => LoginBottomSheet(),
+                                        isScrollControlled: true,
+                                      );
                                       setState(() {
-                                        utilisateur = sharedPreferences.getString('nom');
+                                        utilisateur =
+                                            sharedPreferences.getString('nom');
                                       });
                                     }
                                     if (utilisateur?.isNotEmpty ?? false) {
                                       if (!context.mounted) return;
-                                      Navigator.push(context, MaterialPageRoute(builder: (context) => AnnuairePage()));
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => AnnuairePage(),
+                                        ),
+                                      );
                                     }
                                     break;
 
                                   case "Artisans":
-                                    Navigator.push(context, MaterialPageRoute(builder: (context) => ArtisansPage()));
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => ArtisansPage(),
+                                      ),
+                                    );
                                     break;
 
                                   case "Association":
-                                    Navigator.push(context, MaterialPageRoute(builder: (context) => const AssociationPage()));
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const AssociationPage(),
+                                      ),
+                                    );
                                     break;
 
                                   case "Agenda":
-                                    Navigator.push(context, MaterialPageRoute(builder: (context) => AgendaPage()));
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => AgendaPage(),
+                                      ),
+                                    );
                                     break;
 
                                   case "Annonces":
-                                    Navigator.push(context, MaterialPageRoute(builder: (context) => AnnoncesPages()));
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => AnnoncesPages(),
+                                      ),
+                                    );
+                                    break;
+
+                                  case "Phototheque":
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const PhotothequePage(),
+                                      ),
+                                    );
                                     break;
                                 }
                               },
                               icon: const Column(
                                 children: [
-                                  Icon(Icons.menu, color: Color(0xff424242)),
-                                  Text("Menu", style: TextStyle(color: Color(0xff424242))),
+                                  Icon(Icons.menu,
+                                      color: Color(0xff424242)),
+                                  Text(
+                                    "Menu",
+                                    style:
+                                        TextStyle(color: Color(0xff424242)),
+                                  ),
                                 ],
                               ),
                               label: const Text(""),
