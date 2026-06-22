@@ -55,18 +55,95 @@ class _AnnoncesPagesState extends State<AnnoncesPages> {
     );
   }
 
-  void _openImageFullscreen(String url) {
+  List<String> _getPhotosFromAnnonce(dynamic annonce) {
+    final List<String> urls = [];
+
+    if (annonce is Map && annonce['photos'] is List) {
+      for (final item in annonce['photos']) {
+        final value = item.toString().trim();
+        if (value.isNotEmpty) {
+          urls.add(_buildPhotoUrl(value));
+        }
+      }
+    }
+
+    // Compatibilité avec les anciennes annonces qui n'ont que le champ "photo".
+    if (urls.isEmpty && annonce is Map) {
+      final anciennePhoto = (annonce['photo'] ?? '').toString().trim();
+      if (anciennePhoto.isNotEmpty) {
+        urls.add(_buildPhotoUrl(anciennePhoto));
+      }
+    }
+
+    return urls;
+  }
+
+  String _buildPhotoUrl(String photo) {
+    if (photo.startsWith('http://') || photo.startsWith('https://')) {
+      return photo;
+    }
+
+    return 'https://www.association-sarrazi.fr/uploads_annonces/$photo';
+  }
+
+  void _openImageFullscreen(List<String> photos, {int initialIndex = 0}) {
+    if (photos.isEmpty) return;
+
+    final PageController controller = PageController(initialPage: initialIndex);
+
     showDialog(
       context: context,
       builder: (_) => Dialog(
+        backgroundColor: Colors.black,
         insetPadding: const EdgeInsets.all(10),
         child: Stack(
           children: [
-            InteractiveViewer(
-              minScale: 1.0,
-              maxScale: 5.0,
-              child: Image.network(url, fit: BoxFit.contain),
+            PageView.builder(
+              controller: controller,
+              itemCount: photos.length,
+              itemBuilder: (context, index) {
+                return InteractiveViewer(
+                  minScale: 1.0,
+                  maxScale: 5.0,
+                  child: Center(
+                    child: Image.network(
+                      photos[index],
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stack) {
+                        return const Center(
+                          child: Text(
+                            "Impossible de charger l'image",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                );
+              },
             ),
+            if (photos.length > 1)
+              Positioned(
+                bottom: 12,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.black54,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Text(
+                      "Balayez pour voir les autres photos",
+                      style: TextStyle(color: Colors.white, fontSize: 12),
+                    ),
+                  ),
+                ),
+              ),
             Positioned(
               top: 2,
               right: 2,
@@ -201,11 +278,8 @@ class _AnnoncesPagesState extends State<AnnoncesPages> {
                                 rawTitre.substring(1)
                           : 'Annonce';
 
-                      final photo = (a['photo'] ?? '').toString().trim();
-                      final hasPhoto = photo.isNotEmpty;
-                      final photoUrl = hasPhoto
-                          ? 'https://www.association-sarrazi.fr/uploads_annonces/$photo'
-                          : '';
+                      final photos = _getPhotosFromAnnonce(a);
+                      final hasPhotos = photos.isNotEmpty;
 
                       return Card(
                         clipBehavior: Clip.hardEdge,
@@ -247,52 +321,123 @@ class _AnnoncesPagesState extends State<AnnoncesPages> {
                                 ),
                               ),
                             ),
-                            if (hasPhoto) ...[
+                            if (hasPhotos) ...[
                               GestureDetector(
-                                onTap: () => _openImageFullscreen(photoUrl),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(0),
-                                  child: Image.network(
-                                    photoUrl,
-                                    height: 200,
-                                    width: double.infinity,
-                                    fit: BoxFit.cover,
-                                    loadingBuilder:
-                                        (
-                                          BuildContext context,
-                                          Widget child,
-                                          ImageChunkEvent? loadingProgress,
-                                        ) {
-                                          if (loadingProgress == null) {
-                                            return child;
-                                          }
+                                onTap: () => _openImageFullscreen(photos),
+                                child: Stack(
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(0),
+                                      child: Image.network(
+                                        photos.first,
+                                        height: 200,
+                                        width: double.infinity,
+                                        fit: BoxFit.cover,
+                                        loadingBuilder:
+                                            (
+                                              BuildContext context,
+                                              Widget child,
+                                              ImageChunkEvent? loadingProgress,
+                                            ) {
+                                              if (loadingProgress == null) {
+                                                return child;
+                                              }
 
-                                          return const Center(
-                                            child: SizedBox(
-                                              height: 200,
-                                              child: Center(
-                                                child:
-                                                    CircularProgressIndicator(),
-                                              ),
+                                              return const Center(
+                                                child: SizedBox(
+                                                  height: 200,
+                                                  child: Center(
+                                                    child:
+                                                        CircularProgressIndicator(),
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                        errorBuilder: (context, error, stack) {
+                                          return Container(
+                                            height: 200,
+                                            width: double.infinity,
+                                            alignment: Alignment.center,
+                                            color: Colors.black12,
+                                            child: const Text(
+                                              "Impossible de charger l'image",
                                             ),
                                           );
                                         },
-                                    errorBuilder: (context, error, stack) {
-                                      return Container(
-                                        height: 200,
-                                        width: double.infinity,
-                                        alignment: Alignment.center,
-                                        color: Colors.black12,
-                                        child: const Text(
-                                          "Impossible de charger l'image",
+                                      ),
+                                    ),
+                                    if (photos.length > 1)
+                                      Positioned(
+                                        right: 8,
+                                        bottom: 8,
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 4,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: Colors.black54,
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                          ),
+                                          child: Text(
+                                            "${photos.length} photos",
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                              if (photos.length > 1)
+                                SizedBox(
+                                  height: 78,
+                                  child: ListView.separated(
+                                    padding: const EdgeInsets.all(8),
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: photos.length,
+                                    separatorBuilder: (_, __) =>
+                                        const SizedBox(width: 8),
+                                    itemBuilder: (context, photoIndex) {
+                                      return GestureDetector(
+                                        onTap: () => _openImageFullscreen(
+                                          photos,
+                                          initialIndex: photoIndex,
+                                        ),
+                                        child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(6),
+                                          child: Image.network(
+                                            photos[photoIndex],
+                                            width: 70,
+                                            height: 60,
+                                            fit: BoxFit.cover,
+                                            errorBuilder:
+                                                (context, error, stack) {
+                                                  return Container(
+                                                    width: 70,
+                                                    height: 60,
+                                                    alignment: Alignment.center,
+                                                    color: Colors.black12,
+                                                    child: const Icon(
+                                                      Icons.broken_image,
+                                                      size: 24,
+                                                    ),
+                                                  );
+                                                },
+                                          ),
                                         ),
                                       );
                                     },
                                   ),
                                 ),
-                              ),
                               Text(
-                                "Appuyez sur la photo pour l'ouvrir",
+                                photos.length > 1
+                                    ? "Appuyez sur une photo pour l'ouvrir"
+                                    : "Appuyez sur la photo pour l'ouvrir",
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontSize: 12,
