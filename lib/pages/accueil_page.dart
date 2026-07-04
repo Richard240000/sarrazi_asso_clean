@@ -132,67 +132,69 @@ child: BasePage(title: "", body: getBody(), isHome: true),
 }
 
 Widget getBody() {
-return Column(
-spacing: 10,
-children: [
-Flexible(child: Image.asset('assets/logoS.png')),
-const SizedBox(height: 10),
-Flexible(
-flex: 3,
-child: Center(
-child: Padding(
-padding: const EdgeInsets.symmetric(horizontal: 12),
-child: Column(
-spacing: 12,
-children: [
-Row(
-spacing: 12,
-children: [
-Expanded(
-child: _buildTile(
-label: 'L\'association',
-icon: Icons.groups,
-color: const Color(0xFF455A64),
-onTap: () => Navigator.push(
-context,
-MaterialPageRoute(
-builder: (context) => const AssociationPage(),
-),
-),
-),
-),
-Expanded(
-child: _buildTile(
-label: 'Alertes &\nSignalements',
-icon: Icons.notifications_active,
-color: const Color(0xFF1A237E),
-onTap: _openAlerteSignalement,
-badgeVisible: hasNewAlert,
-),
-),
-],
-),
-Row(
-spacing: 12,
-children: [
-Expanded(
-child: _buildTile(
-label: 'Annuaire',
-icon: Icons.contact_phone,
-color: const Color(0xFF4527A0),
-isSecure: true,
-onTap: () async {
-if (sharedPreferences.getString('nom')?.isEmpty ?? true) {
-await showModalBottomSheet(
-context: context,
-builder: (context) => LoginBottomSheet(),
-isScrollControlled: true,
-);
-setState(() {
-utilisateur = sharedPreferences.getString('nom');
-});
-}
-
+  return SingleChildScrollView(
+    padding: const EdgeInsets.only(bottom: 16),
+    child: Column(
+      spacing: 10,
+      children: [
+        Image.asset(
+          'assets/logoS.png',
+          height: 120,
+          fit: BoxFit.contain,
+        ),
+        const SizedBox(height: 10),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: Column(
+            spacing: 12,
+            children: [
+              Row(
+                spacing: 12,
+                children: [
+                  Expanded(
+                    child: _buildTile(
+                      label: 'L\'association',
+                      icon: Icons.groups,
+                      color: const Color(0xFF455A64),
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const AssociationPage(),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: _buildTile(
+                      label: 'Alertes &\nSignalements',
+                      icon: Icons.notifications_active,
+                      color: const Color(0xFF1A237E),
+                      onTap: _openAlerteSignalement,
+                      badgeVisible: hasNewAlert,
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                spacing: 12,
+                children: [
+                  Expanded(
+                    child: _buildTile(
+                      label: 'Annuaire',
+                      icon: Icons.contact_phone,
+                      color: const Color(0xFF4527A0),
+                      isSecure: true,
+                      onTap: () async {
+                        if (sharedPreferences.getString('nom')?.isEmpty ?? true) {
+                          await showModalBottomSheet(
+                            context: context,
+                            builder: (context) => LoginBottomSheet(),
+                            isScrollControlled: true,
+                          );
+                          setState(() {
+                            utilisateur = sharedPreferences.getString('nom');
+                          });
+                        }
 
                         if (sharedPreferences.getString('nom')?.isNotEmpty ?? false) {
                           if (!mounted) return;
@@ -298,12 +300,10 @@ utilisateur = sharedPreferences.getString('nom');
             ],
           ),
         ),
-      ),
+        _buildBandeauMaj(),
+      ],
     ),
-    _buildBandeauMaj(),
-  ],
-);
-
+  );
 }
 
 Widget _buildBandeauMaj() {
