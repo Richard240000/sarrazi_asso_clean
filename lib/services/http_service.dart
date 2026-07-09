@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
+
 import 'package:http/http.dart' as http;
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:sarrazi_asso_clean/main.dart';
@@ -7,26 +9,26 @@ import 'package:sarrazi_asso_clean/main.dart';
 class HttpService {
   static String baseUrl = "https://www.association-sarrazi.fr";
   static String authentification = "verifier_login.php";
+
   static Future<Tuple> checkAppVersion(String currentVersion) async {
     try {
       var route = "$baseUrl/check_version.php";
+      final platform = Platform.isIOS ? "ios" : "android";
+      final url = "$route?version=$currentVersion&platform=$platform";
 
       log("**************************************************************");
-      log("CHECK VERSION => $route");
+      log("CHECK VERSION => $url");
 
       final bool isConnected = await InternetConnection().hasInternetAccess;
       if (!isConnected) {
         return Tuple(false, "Pas de connexion internet");
       }
 
-      final response = await http.get(
-        Uri.parse("$route?version=$currentVersion"),
-      );
+      final response = await http.get(Uri.parse(url));
       log("[${response.statusCode}] ${response.body}");
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-
         return Tuple(true, data);
       } else {
         return Tuple(false, "Erreur serveur");
@@ -49,7 +51,6 @@ class HttpService {
         'password': password.trim(),
       });
 
-      // Vérifie la connexion internet
       final bool isConnected = await InternetConnection().hasInternetAccess;
       if (!isConnected) {
         log("=> pas de connexion internet");
@@ -64,8 +65,10 @@ class HttpService {
         headers: {'Content-Type': 'application/json'},
         body: body,
       );
+
       log("[${response.statusCode}] ${response.body}");
       final data = jsonDecode(response.body);
+
       if (data['status'] == 'success') {
         await sharedPreferences.setString('email', data['email']);
         await sharedPreferences.setString('nom', data['nom']);
@@ -121,7 +124,6 @@ class HttpService {
       log("**************************************************************");
       log(route);
 
-      // Vérifie la connexion internet
       final bool isConnected = await InternetConnection().hasInternetAccess;
       if (!isConnected) {
         log("=> pas de connexion internet");
@@ -131,15 +133,12 @@ class HttpService {
         );
       }
 
-      // Si internet OK, envoi de la requête au serveur
       final response = await http.get(Uri.parse(route));
       log("[${response.statusCode}] ${response.body}");
-      // Si requête OK, formate  la reponse et retourne les données à la page
+
       if (response.statusCode == 200) {
         return Tuple(true, json.decode(response.body));
-      }
-      // Si requête KO, retourne un message d'erreur à la page
-      else {
+      } else {
         return Tuple(false, "Erreur lors du chargement des données");
       }
     } on Exception catch (e) {
