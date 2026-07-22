@@ -63,13 +63,27 @@ class _AjouterPublicationPageState extends State<AjouterPublicationPage> {
     });
 
     if (uid == null && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(behavior: SnackBarBehavior.floating, content: Text("Vous devez être connecté pour envoyer un signalement.")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          behavior: SnackBarBehavior.floating,
+          content: Text(
+            "Vous devez être connecté pour envoyer un signalement.",
+          ),
+        ),
+      );
     }
   }
 
   Future<void> _submit() async {
     if (_userId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(behavior: SnackBarBehavior.floating, content: Text("Vous devez être connecté pour envoyer un signalement.")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          behavior: SnackBarBehavior.floating,
+          content: Text(
+            "Vous devez être connecté pour envoyer un signalement.",
+          ),
+        ),
+      );
       return;
     }
 
@@ -96,7 +110,11 @@ class _AjouterPublicationPageState extends State<AjouterPublicationPage> {
         'urgence': _urgence,
       };
 
-      final res = await http.post(uri, headers: {'Content-Type': 'application/json; charset=utf-8'}, body: jsonEncode(payload));
+      final res = await http.post(
+        uri,
+        headers: {'Content-Type': 'application/json; charset=utf-8'},
+        body: jsonEncode(payload),
+      );
 
       if (res.statusCode != 200) {
         throw Exception('HTTP ${res.statusCode} sur publications_add.php');
@@ -104,7 +122,9 @@ class _AjouterPublicationPageState extends State<AjouterPublicationPage> {
 
       final decoded = jsonDecode(res.body);
       if (decoded is! Map || decoded['success'] != true) {
-        final err = (decoded is Map) ? (decoded['error']?.toString() ?? 'Erreur ajout') : 'Réponse JSON invalide';
+        final err = (decoded is Map)
+            ? (decoded['error']?.toString() ?? 'Erreur ajout')
+            : 'Réponse JSON invalide';
         throw Exception(err);
       }
 
@@ -114,8 +134,15 @@ class _AjouterPublicationPageState extends State<AjouterPublicationPage> {
         context: context,
         builder: (context) => AlertDialog(
           title: const Text('Signalement envoyé'),
-          content: const Text("Votre signalement a bien été enregistré. Il sera visible dans l'application après validation."),
-          actions: [TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('OK'))],
+          content: const Text(
+            "Votre signalement a bien été enregistré. Il sera visible dans l'application après validation.",
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
         ),
       );
 
@@ -123,7 +150,12 @@ class _AjouterPublicationPageState extends State<AjouterPublicationPage> {
       Navigator.of(context).pop(true);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(behavior: SnackBarBehavior.floating, content: Text('Erreur: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          content: Text('Erreur: $e'),
+        ),
+      );
     } finally {
       if (mounted) {
         setState(() => _submitting = false);
@@ -149,7 +181,11 @@ class _AjouterPublicationPageState extends State<AjouterPublicationPage> {
 
                     TextFormField(
                       controller: _titreCtrl,
-                      decoration: const InputDecoration(labelText: 'Titre', hintText: 'Ex : Lampadaire en panne', border: OutlineInputBorder()),
+                      decoration: const InputDecoration(
+                        labelText: 'Titre',
+                        hintText: 'Ex : Lampadaire en panne',
+                        border: OutlineInputBorder(),
+                      ),
                       maxLength: 120,
                       textInputAction: TextInputAction.next,
                       validator: (v) {
@@ -163,7 +199,11 @@ class _AjouterPublicationPageState extends State<AjouterPublicationPage> {
 
                     TextFormField(
                       controller: _catCtrl,
-                      decoration: const InputDecoration(labelText: 'Catégorie (optionnel)', hintText: 'Ex : Éclairage, Voirie, Sécurité…', border: OutlineInputBorder()),
+                      decoration: const InputDecoration(
+                        labelText: 'Catégorie (optionnel)',
+                        hintText: 'Ex : Éclairage, Voirie, Sécurité…',
+                        border: OutlineInputBorder(),
+                      ),
                       maxLength: 50,
                       textInputAction: TextInputAction.next,
                       validator: (v) {
@@ -176,7 +216,11 @@ class _AjouterPublicationPageState extends State<AjouterPublicationPage> {
 
                     TextFormField(
                       controller: _secteurCtrl,
-                      decoration: const InputDecoration(labelText: 'Secteur (optionnel)', hintText: 'Ex : Route de Sarrazi , Rue du Hameau …', border: OutlineInputBorder()),
+                      decoration: const InputDecoration(
+                        labelText: 'Secteur (optionnel)',
+                        hintText: 'Ex : Route de Sarrazi , Rue du Hameau …',
+                        border: OutlineInputBorder(),
+                      ),
                       maxLength: 80,
                       textInputAction: TextInputAction.next,
                       validator: (v) {
@@ -189,7 +233,12 @@ class _AjouterPublicationPageState extends State<AjouterPublicationPage> {
 
                     TextFormField(
                       controller: _descCtrl,
-                      decoration: const InputDecoration(labelText: 'Description', hintText: 'Décrivez clairement le problème constaté…', border: OutlineInputBorder(), alignLabelWithHint: true),
+                      decoration: const InputDecoration(
+                        labelText: 'Description',
+                        hintText: 'Décrivez clairement le problème constaté…',
+                        border: OutlineInputBorder(),
+                        alignLabelWithHint: true,
+                      ),
                       minLines: 4,
                       maxLines: 8,
                       validator: (v) {
@@ -201,20 +250,45 @@ class _AjouterPublicationPageState extends State<AjouterPublicationPage> {
                     const SizedBox(height: 18),
                     const Text(
                       "Signalement publié après validation",
-                      style: TextStyle(fontSize: 14, color: Colors.grey, fontStyle: FontStyle.italic),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey,
+                        fontStyle: FontStyle.italic,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 18),
 
                     ElevatedButton.icon(
                       onPressed: _submitting ? null : _submit,
-                      icon: _submitting ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.send, color: Colors.white, size: 25),
-                      label: Text(_submitting ? 'Envoi...' : 'Envoyer le signalement', style: TextStyle(color: Colors.white, fontSize: 16)),
+                      icon: _submitting
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(
+                              Icons.send,
+                              color: Colors.white,
+                              size: 25,
+                            ),
+                      label: Text(
+                        _submitting ? 'Envoi...' : 'Envoyer le signalement',
+                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      ),
                       style: ButtonStyle(
-                        padding: WidgetStatePropertyAll(EdgeInsetsGeometry.all(10)),
+                        padding: WidgetStatePropertyAll(
+                          EdgeInsetsGeometry.all(10),
+                        ),
                         elevation: WidgetStatePropertyAll(5),
-                        backgroundColor: WidgetStatePropertyAll(Colors.blue[800]),
-                        shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5)))),
+                        backgroundColor: WidgetStatePropertyAll(
+                          Colors.blue[800],
+                        ),
+                        shape: WidgetStatePropertyAll(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(5)),
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -226,7 +300,10 @@ class _AjouterPublicationPageState extends State<AjouterPublicationPage> {
 
   Widget _buildUrgenceSelector() {
     return InputDecorator(
-      decoration: const InputDecoration(labelText: 'Niveau d’urgence', border: OutlineInputBorder()),
+      decoration: const InputDecoration(
+        labelText: 'Niveau d’urgence',
+        border: OutlineInputBorder(),
+      ),
 
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(

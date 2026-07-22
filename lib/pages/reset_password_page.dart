@@ -32,7 +32,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   String? serverMessage;
 
   // ⚠️ À ADAPTER : URL de ton API
-  static const String resetApiUrl = 'https://www.association-sarrazi.fr/reset_api.php';
+  static const String resetApiUrl =
+      'https://www.association-sarrazi.fr/reset_api.php';
 
   Future<void> _resetPassword() async {
     if (!_formKey.currentState!.validate()) return;
@@ -51,12 +52,24 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     }
 
     if (password != confirm) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(behavior: SnackBarBehavior.floating, content: Text('Les deux mots de passe ne correspondent pas.'), backgroundColor: Colors.red));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          behavior: SnackBarBehavior.floating,
+          content: Text('Les deux mots de passe ne correspondent pas.'),
+          backgroundColor: Colors.red,
+        ),
+      );
       return;
     }
 
     if (effectiveToken.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(behavior: SnackBarBehavior.floating, content: Text('Le code de réinitialisation est obligatoire.'), backgroundColor: Colors.red));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          behavior: SnackBarBehavior.floating,
+          content: Text('Le code de réinitialisation est obligatoire.'),
+          backgroundColor: Colors.red,
+        ),
+      );
       return;
     }
 
@@ -66,17 +79,27 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     });
 
     try {
-      final response = await http.post(Uri.parse(resetApiUrl), headers: {'Content-Type': 'application/json'}, body: jsonEncode({'token': effectiveToken, 'password': password}));
+      final response = await http.post(
+        Uri.parse(resetApiUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'token': effectiveToken, 'password': password}),
+      );
 
-      print('[DEBUG] Status reset: ${response.statusCode}');
-      print('[DEBUG] Body reset: ${response.body}');
+      debugPrint('[DEBUG] Status reset: ${response.statusCode}');
+      debugPrint('[DEBUG] Body reset: ${response.body}');
 
       if (response.statusCode != 200) {
         setState(() {
           serverMessage = 'Erreur serveur (${response.statusCode}).';
         });
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(behavior: SnackBarBehavior.floating, content: Text('Erreur serveur (${response.statusCode}).'), backgroundColor: Colors.red));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            content: Text('Erreur serveur (${response.statusCode}).'),
+            backgroundColor: Colors.red,
+          ),
+        );
         return;
       }
 
@@ -84,17 +107,24 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       try {
         data = jsonDecode(response.body) as Map<String, dynamic>;
       } on FormatException catch (e) {
-        print('[DEBUG] Erreur de parsing JSON reset: $e');
+        debugPrint('[DEBUG] Erreur de parsing JSON reset: $e');
         setState(() {
           serverMessage = 'Réponse invalide du serveur.';
         });
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(behavior: SnackBarBehavior.floating, content: Text('Réponse invalide du serveur.'), backgroundColor: Colors.red));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            behavior: SnackBarBehavior.floating,
+            content: Text('Réponse invalide du serveur.'),
+            backgroundColor: Colors.red,
+          ),
+        );
         return;
       }
 
       final success = data['success'] == true;
-      final message = (data['message'] ?? 'Une réponse a été reçue.').toString();
+      final message = (data['message'] ?? 'Une réponse a été reçue.')
+          .toString();
 
       setState(() {
         serverMessage = message;
@@ -102,24 +132,38 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(behavior: SnackBarBehavior.floating, content: Text(message), backgroundColor: success ? Colors.green[700] : Colors.red[700]));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          content: Text(message),
+          backgroundColor: success ? Colors.green[700] : Colors.red[700],
+        ),
+      );
 
       if (success) {
         // On ferme la page "Nouveau mot de passe"
         Navigator.pop(context); // ResetPasswordPage
 
         // Puis on ferme la page "Mot de passe oublié"
-        Navigator.pop(context); // ForgotPasswordPage -> retour à la bottom sheet de login
+        Navigator.pop(
+          context,
+        ); // ForgotPasswordPage -> retour à la bottom sheet de login
       }
     } catch (e) {
-      print('[DEBUG] Erreur réseau reset: $e');
+      debugPrint('[DEBUG] Erreur réseau reset: $e');
 
       setState(() {
         serverMessage = 'Erreur réseau. Veuillez réessayer.';
       });
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(behavior: SnackBarBehavior.floating, content: Text('Erreur réseau. Veuillez réessayer.'), backgroundColor: Colors.red));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          behavior: SnackBarBehavior.floating,
+          content: Text('Erreur réseau. Veuillez réessayer.'),
+          backgroundColor: Colors.red,
+        ),
+      );
     } finally {
       if (mounted) {
         setState(() => isLoading = false);
@@ -129,7 +173,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
   @override
   Widget build(BuildContext context) {
-    final bool doitSaisirCode = widget.token == null || widget.token!.trim().isEmpty;
+    final bool doitSaisirCode =
+        widget.token == null || widget.token!.trim().isEmpty;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Nouveau mot de passe')),
@@ -141,14 +186,22 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(doitSaisirCode ? "Saisissez le code reçu par email puis choisissez un nouveau mot de passe." : "Veuillez choisir un nouveau mot de passe.", textAlign: TextAlign.center),
+                Text(
+                  doitSaisirCode
+                      ? "Saisissez le code reçu par email puis choisissez un nouveau mot de passe."
+                      : "Veuillez choisir un nouveau mot de passe.",
+                  textAlign: TextAlign.center,
+                ),
                 const SizedBox(height: 20),
 
                 // Champ "Code reçu par email" uniquement si aucun token n'est fourni
                 if (doitSaisirCode) ...[
                   TextFormField(
                     controller: tokenController,
-                    decoration: const InputDecoration(labelText: 'Code de réinitialisation', prefixIcon: Icon(Icons.vpn_key)),
+                    decoration: const InputDecoration(
+                      labelText: 'Code de réinitialisation',
+                      prefixIcon: Icon(Icons.vpn_key),
+                    ),
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
                         return 'Code obligatoire';
@@ -166,7 +219,11 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                     labelText: 'Nouveau mot de passe',
                     prefixIcon: const Icon(Icons.lock),
                     suffixIcon: IconButton(
-                      icon: Icon(obscurePassword ? Icons.visibility : Icons.visibility_off),
+                      icon: Icon(
+                        obscurePassword
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                      ),
                       onPressed: () {
                         setState(() {
                           obscurePassword = !obscurePassword;
@@ -192,7 +249,11 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                     labelText: 'Confirmer le mot de passe',
                     prefixIcon: const Icon(Icons.lock_outline),
                     suffixIcon: IconButton(
-                      icon: Icon(obscureConfirm ? Icons.visibility : Icons.visibility_off),
+                      icon: Icon(
+                        obscureConfirm
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                      ),
                       onPressed: () {
                         setState(() {
                           obscureConfirm = !obscureConfirm;
@@ -212,7 +273,13 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: isLoading ? null : _resetPassword,
-                    child: isLoading ? const SizedBox(height: 22, width: 22, child: CircularProgressIndicator(strokeWidth: 2)) : const Text('Valider le nouveau mot de passe'),
+                    child: isLoading
+                        ? const SizedBox(
+                            height: 22,
+                            width: 22,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Text('Valider le nouveau mot de passe'),
                   ),
                 ),
                 if (serverMessage != null) ...[
@@ -220,7 +287,10 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                   Text(
                     serverMessage!,
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.grey[700], fontStyle: FontStyle.italic),
+                    style: TextStyle(
+                      color: Colors.grey[700],
+                      fontStyle: FontStyle.italic,
+                    ),
                   ),
                 ],
               ],

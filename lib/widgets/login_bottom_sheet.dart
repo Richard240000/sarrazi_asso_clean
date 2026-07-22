@@ -37,13 +37,13 @@ class _LoginBottomSheetState extends State<LoginBottomSheet> {
 
     setState(() => isLoading = false);
 
-    if (response?.isSuccess ?? false) {
+    if (response.isSuccess) {
       if (!mounted) return;
       TextInput.finishAutofillContext();
       Navigator.pop(context, true);
     } else {
       setState(() {
-        errorMessage = response?.data;
+        errorMessage = response.data;
       });
     }
   }
@@ -57,7 +57,9 @@ class _LoginBottomSheetState extends State<LoginBottomSheet> {
           child: Padding(
             //padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom < 100 ? kBottomNavigationBarHeight : MediaQuery.of(context).viewInsets.bottom),
             padding: EdgeInsetsGeometry.only(
-              bottom: Platform.isAndroid && MediaQuery.of(context).viewInsets.bottom < 100
+              bottom:
+                  Platform.isAndroid &&
+                      MediaQuery.of(context).viewInsets.bottom < 100
                   ? MediaQuery.paddingOf(context).bottom
                   : MediaQuery.of(context).viewInsets.bottom < 100
                   ? kBottomNavigationBarHeight
@@ -68,7 +70,10 @@ class _LoginBottomSheetState extends State<LoginBottomSheet> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 16,
+                  ),
                   child: Center(
                     child: AutofillGroup(
                       child: Form(
@@ -81,16 +86,25 @@ class _LoginBottomSheetState extends State<LoginBottomSheet> {
                             Text(
                               "Espace sécurisé",
                               textAlign: TextAlign.center,
-                              style: TextStyle(color: Colors.white, fontSize: 18),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                              ),
                             ),
 
                             // Champ EMAIL
                             TextFormField(
-                              autofillHints: [AutofillHints.newUsername, AutofillHints.username],
+                              autofillHints: [
+                                AutofillHints.newUsername,
+                                AutofillHints.username,
+                              ],
                               controller: emailController,
                               decoration: InputDecoration(
                                 hintText: "Adresse mail",
-                                prefixIcon: Icon(Icons.email, color: Colors.blue[800]),
+                                prefixIcon: Icon(
+                                  Icons.email,
+                                  color: Colors.blue[800],
+                                ),
                                 errorStyle: TextStyle(color: Colors.white),
                               ),
                               keyboardType: TextInputType.emailAddress,
@@ -98,7 +112,9 @@ class _LoginBottomSheetState extends State<LoginBottomSheet> {
                                 if (value == null || value.isEmpty) {
                                   return 'Champ obligatoire';
                                 }
-                                final bool emailValid = RegExp(r"^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$").hasMatch(value);
+                                final bool emailValid = RegExp(
+                                  r"^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$",
+                                ).hasMatch(value);
                                 if (!emailValid) {
                                   return 'Format incorrect';
                                 }
@@ -113,7 +129,10 @@ class _LoginBottomSheetState extends State<LoginBottomSheet> {
                               obscureText: true,
                               decoration: InputDecoration(
                                 hintText: "Mot de passe",
-                                prefixIcon: Icon(Icons.lock, color: Colors.blue[800]),
+                                prefixIcon: Icon(
+                                  Icons.lock,
+                                  color: Colors.blue[800],
+                                ),
                                 errorStyle: TextStyle(color: Colors.white),
                               ),
                               validator: (value) {
@@ -129,9 +148,18 @@ class _LoginBottomSheetState extends State<LoginBottomSheet> {
                               alignment: Alignment.centerRight,
                               child: TextButton(
                                 onPressed: () {
-                                  Navigator.push(context, MaterialPageRoute(builder: (_) => const ForgotPasswordPage()));
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) =>
+                                          const ForgotPasswordPage(),
+                                    ),
+                                  );
                                 },
-                                child: const Text("Mot de passe oublié ?", style: TextStyle(color: Colors.white)),
+                                child: const Text(
+                                  "Mot de passe oublié ?",
+                                  style: TextStyle(color: Colors.white),
+                                ),
                               ),
                             ),
 
@@ -142,24 +170,59 @@ class _LoginBottomSheetState extends State<LoginBottomSheet> {
                                 Expanded(
                                   child: OutlinedButton(
                                     style: ButtonStyle(
-                                      padding: WidgetStatePropertyAll(EdgeInsets.all(15)),
-                                      shape: WidgetStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-                                      side: WidgetStateProperty.all(BorderSide(color: Colors.white, width: 1.0)),
+                                      padding: WidgetStatePropertyAll(
+                                        EdgeInsets.all(15),
+                                      ),
+                                      shape: WidgetStateProperty.all(
+                                        RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
+                                        ),
+                                      ),
+                                      side: WidgetStateProperty.all(
+                                        BorderSide(
+                                          color: Colors.white,
+                                          width: 1.0,
+                                        ),
+                                      ),
                                     ),
                                     onPressed: () {
                                       Navigator.pop(context);
                                     },
-                                    child: Text("Annuler", style: TextStyle(color: Colors.white)),
+                                    child: Text(
+                                      "Annuler",
+                                      style: TextStyle(color: Colors.white),
+                                    ),
                                   ),
                                 ),
                                 Expanded(
                                   child: ElevatedButton(
-                                    onPressed: isLoading ? null : () async => await seConnecter(),
+                                    onPressed: isLoading
+                                        ? null
+                                        : () async => await seConnecter(),
                                     style: ButtonStyle(
-                                      padding: WidgetStatePropertyAll(EdgeInsets.all(15)),
-                                      shape: WidgetStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                                      padding: WidgetStatePropertyAll(
+                                        EdgeInsets.all(15),
+                                      ),
+                                      shape: WidgetStateProperty.all(
+                                        RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
+                                        ),
+                                      ),
                                     ),
-                                    child: isLoading ? SizedBox(height: 24, width: 24, child: CircularProgressIndicator(strokeWidth: 3, color: Colors.white)) : Text("Se connecter"),
+                                    child: isLoading
+                                        ? SizedBox(
+                                            height: 24,
+                                            width: 24,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 3,
+                                              color: Colors.white,
+                                            ),
+                                          )
+                                        : Text("Se connecter"),
                                   ),
                                 ),
                               ],

@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -65,7 +64,13 @@ class _AnnuairePageState extends State<AnnuairePage> {
 
   @override
   Widget build(BuildContext context) {
-    return BasePage(title: "Annuaire", body: getBody(), message: "Si vous souhaitez modifier vos coordonnées, n'hésitez pas à nous contacter !", withContact: true);
+    return BasePage(
+      title: "Annuaire",
+      body: getBody(),
+      message:
+          "Si vous souhaitez modifier vos coordonnées, n'hésitez pas à nous contacter !",
+      withContact: true,
+    );
   }
 
   Widget getBody() {
@@ -90,7 +95,10 @@ class _AnnuairePageState extends State<AnnuairePage> {
                       borderSide: BorderSide(color: Colors.pink, width: 0.5),
                     ),
                     filled: true,
-                    contentPadding: EdgeInsets.symmetric(horizontal: 5, vertical: 14),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 5,
+                      vertical: 14,
+                    ),
                   ),
                   onSubmitted: _searchAnnuaire,
                 ),
@@ -98,12 +106,24 @@ class _AnnuairePageState extends State<AnnuairePage> {
               ElevatedButton.icon(
                 onPressed: () => _searchAnnuaire(_searchController.text),
                 // icon: const Icon(Symbols.search, color: Colors.white, size: 25),
-                label: Text('Rechercher', style: TextStyle(color: Colors.white, fontSize: 14)),
+                label: Text(
+                  'Rechercher',
+                  style: TextStyle(color: Colors.white, fontSize: 14),
+                ),
                 style: ButtonStyle(
-                  padding: WidgetStatePropertyAll(EdgeInsetsGeometry.symmetric(horizontal: 10, vertical: 14.5)),
+                  padding: WidgetStatePropertyAll(
+                    EdgeInsetsGeometry.symmetric(
+                      horizontal: 10,
+                      vertical: 14.5,
+                    ),
+                  ),
                   elevation: WidgetStatePropertyAll(3),
                   backgroundColor: WidgetStatePropertyAll(Colors.blue[800]),
-                  shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10)))),
+                  shape: WidgetStatePropertyAll(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -113,9 +133,17 @@ class _AnnuairePageState extends State<AnnuairePage> {
             child: _isLoading
                 ? Center(child: CircularProgressIndicator())
                 : _annuaire.isNotEmpty
-                ? ListView.builder(itemCount: _annuaire.length, itemBuilder: (context, index) => _buildMemberCard(_annuaire[index], index))
+                ? ListView.builder(
+                    itemCount: _annuaire.length,
+                    itemBuilder: (context, index) =>
+                        _buildMemberCard(_annuaire[index], index),
+                  )
                 : Center(
-                    child: Text(_message, style: GoogleFonts.poppins(), textAlign: TextAlign.center),
+                    child: Text(
+                      _message,
+                      style: GoogleFonts.poppins(),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
           ),
         ],
@@ -141,17 +169,30 @@ class _AnnuairePageState extends State<AnnuairePage> {
                     margin: EdgeInsets.only(top: 00),
                     alignment: Alignment.center,
                     width: 40,
-                    decoration: BoxDecoration(color: Color(((index + 1) * 0.1547 * 0xFFFFFF).toInt()).withAlpha(255), shape: BoxShape.circle),
+                    decoration: BoxDecoration(
+                      color: Color(
+                        ((index + 1) * 0.1547 * 0xFFFFFF).toInt(),
+                      ).withAlpha(255),
+                      shape: BoxShape.circle,
+                    ),
                     child: Text(
                       "${member['prenom'].toString().trim().substring(0, 1).toUpperCase()}${member['nom'].toString().trim().substring(0, 1).toUpperCase()}",
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 16),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                      ),
                     ),
                   ),
                   Expanded(
                     child: Text(
                       "${member['prenom']?.toString().trim().capitalize()} ${member['nom']?.toString().trim().capitalize()}",
-                      style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blueGrey),
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blueGrey,
+                      ),
                     ),
                   ),
                 ],
@@ -161,12 +202,20 @@ class _AnnuairePageState extends State<AnnuairePage> {
                 padding: const EdgeInsets.only(left: 11.0),
                 child: Column(
                   children: [
-                    member['numero']?.isNotEmpty ?? false ? _buildInfoRow(Icons.home, "${member['numero']} ${member['rue']}") : _buildInfoRow(Icons.home, "${member['rue']}"),
+                    member['numero']?.isNotEmpty ?? false
+                        ? _buildInfoRow(
+                            Icons.home,
+                            "${member['numero']} ${member['rue']}",
+                          )
+                        : _buildInfoRow(Icons.home, "${member['rue']}"),
                     member['mail']?.isNotEmpty
                         ? InkWell(
                             child: _buildInfoRow(Icons.email, member['mail']),
                             onTap: () async {
-                              final Email email = Email(recipients: [member['mail']], isHTML: false);
+                              final Email email = Email(
+                                recipients: [member['mail']],
+                                isHTML: false,
+                              );
 
                               await FlutterEmailSender.send(email);
                             },
@@ -174,9 +223,14 @@ class _AnnuairePageState extends State<AnnuairePage> {
                         : SizedBox.shrink(),
                     member['portable']?.isNotEmpty ?? false
                         ? InkWell(
-                            child: _buildInfoRow(Icons.phone, member['portable']),
+                            child: _buildInfoRow(
+                              Icons.phone,
+                              member['portable'],
+                            ),
                             onTap: () async {
-                              await launchUrl(Uri.parse("tel:${member['portable']}"));
+                              await launchUrl(
+                                Uri.parse("tel:${member['portable']}"),
+                              );
                             },
                           )
                         : SizedBox.shrink(),

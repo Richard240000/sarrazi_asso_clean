@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sarrazi_asso_clean/pages/base_page.dart';
 import 'package:http/http.dart' as http;
@@ -105,9 +104,9 @@ class _DocumentsPageState extends State<DocumentsPage> {
         url: url,
         fileName: '$titre.pdf',
       );
-      print("PDF URL = $url");
-      print("PDF localPath = $localPath");
-      print("PDF size = ${await File(localPath).length()}");
+      debugPrint("PDF URL = $url");
+      debugPrint("PDF localPath = $localPath");
+      debugPrint("PDF size = ${await File(localPath).length()}");
 
       if (!mounted) return;
 
@@ -148,7 +147,7 @@ class _DocumentsPageState extends State<DocumentsPage> {
           title: titre,
         ),
       );
-    } on Exception catch (e) {
+    } on Exception {
       if (!mounted) return;
       _snack("Erreur : impossible de partager le document.");
     } finally {
@@ -163,9 +162,9 @@ class _DocumentsPageState extends State<DocumentsPage> {
 
   Widget _body() {
     if (isLoading) return const Center(child: CircularProgressIndicator());
-    if (documents.isEmpty)
+    if (documents.isEmpty) {
       return const Center(child: Text('Aucun document disponible.'));
-
+    }
     return ListView.builder(
       padding: const EdgeInsets.all(8),
       itemCount: documents.length,

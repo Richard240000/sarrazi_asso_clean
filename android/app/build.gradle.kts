@@ -10,7 +10,7 @@ plugins {
 
 android {
     namespace = "fr.sarrazi.asso"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 36
     ndkVersion= "29.0.13113456 rc1"
 
     // Chargement du fichier key.properties (si présent)
@@ -42,7 +42,7 @@ android {
     defaultConfig {
         applicationId = "fr.sarrazi.asso"
         minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        targetSdk = 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         multiDexEnabled = true

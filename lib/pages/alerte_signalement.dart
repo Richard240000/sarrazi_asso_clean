@@ -20,7 +20,8 @@ class AlerteSignalementPage extends StatefulWidget {
   State<AlerteSignalementPage> createState() => _AlerteSignalementPageState();
 }
 
-class _AlerteSignalementPageState extends State<AlerteSignalementPage> with SingleTickerProviderStateMixin {
+class _AlerteSignalementPageState extends State<AlerteSignalementPage>
+    with SingleTickerProviderStateMixin {
   static const String baseUrl = 'https://www.association-sarrazi.fr/';
 
   int? _userId;
@@ -83,9 +84,17 @@ class _AlerteSignalementPageState extends State<AlerteSignalementPage> with Sing
   }
 
   Uri _buildSignalementsUri() {
-    final params = <String, String>{'type': 'signalement', 'sort': _sort, 'limit': '200', 'offset': '0', 'user_id': (_userId ?? 0).toString()};
+    final params = <String, String>{
+      'type': 'signalement',
+      'sort': _sort,
+      'limit': '200',
+      'offset': '0',
+      'user_id': (_userId ?? 0).toString(),
+    };
 
-    return Uri.parse('${baseUrl}publications_list.php').replace(queryParameters: params);
+    return Uri.parse(
+      '${baseUrl}publications_list.php',
+    ).replace(queryParameters: params);
   }
 
   Future<List<Publication>> _fetchSignalements() async {
@@ -98,14 +107,18 @@ class _AlerteSignalementPageState extends State<AlerteSignalementPage> with Sing
 
     final decoded = json.decode(res.body);
     if (decoded is! Map || decoded['success'] != true) {
-      final err = (decoded is Map) ? (decoded['error']?.toString() ?? 'Erreur inconnue') : 'Réponse JSON invalide';
+      final err = (decoded is Map)
+          ? (decoded['error']?.toString() ?? 'Erreur inconnue')
+          : 'Réponse JSON invalide';
       throw Exception(err);
     }
 
     final data = decoded['data'];
     if (data is! List) return [];
 
-    return data.map((e) => Publication.fromJson(e as Map<String, dynamic>)).toList();
+    return data
+        .map((e) => Publication.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   Future<List<AlerteItem>> _fetchAlertes() async {
@@ -125,7 +138,9 @@ class _AlerteSignalementPageState extends State<AlerteSignalementPage> with Sing
       throw Exception('Réponse JSON invalide pour news.php');
     }
 
-    return decoded.map((e) => AlerteItem.fromJson(e as Map<String, dynamic>)).toList();
+    return decoded
+        .map((e) => AlerteItem.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   Future<ToggleLikeResult> _toggleLike(int publicationId) async {
@@ -136,7 +151,11 @@ class _AlerteSignalementPageState extends State<AlerteSignalementPage> with Sing
     final uri = Uri.parse('${baseUrl}publications_like.php');
     final payload = {'user_id': _userId, 'publication_id': publicationId};
 
-    final res = await http.post(uri, headers: {'Content-Type': 'application/json; charset=utf-8'}, body: jsonEncode(payload));
+    final res = await http.post(
+      uri,
+      headers: {'Content-Type': 'application/json; charset=utf-8'},
+      body: jsonEncode(payload),
+    );
 
     if (res.statusCode != 200) {
       throw Exception('HTTP ${res.statusCode} sur publications_like.php');
@@ -144,13 +163,17 @@ class _AlerteSignalementPageState extends State<AlerteSignalementPage> with Sing
 
     final decoded = json.decode(res.body);
     if (decoded is! Map || decoded['success'] != true) {
-      final err = (decoded is Map) ? (decoded['error']?.toString() ?? 'Erreur like') : 'Réponse JSON invalide';
+      final err = (decoded is Map)
+          ? (decoded['error']?.toString() ?? 'Erreur like')
+          : 'Réponse JSON invalide';
       throw Exception(err);
     }
 
     return ToggleLikeResult(
       likedByMe: (decoded['liked_by_me'] ?? 0) == 1,
-      likesCount: (decoded['likes_count'] ?? 0) is int ? decoded['likes_count'] : int.tryParse('${decoded['likes_count']}') ?? 0,
+      likesCount: (decoded['likes_count'] ?? 0) is int
+          ? decoded['likes_count']
+          : int.tryParse('${decoded['likes_count']}') ?? 0,
       action: decoded['action']?.toString() ?? '',
     );
   }
@@ -161,23 +184,37 @@ class _AlerteSignalementPageState extends State<AlerteSignalementPage> with Sing
     }
 
     final uri = Uri.parse('${baseUrl}publications_update_status.php');
-    final payload = {'user_id': _userId, 'publication_id': publicationId, 'statut': newStatus};
+    final payload = {
+      'user_id': _userId,
+      'publication_id': publicationId,
+      'statut': newStatus,
+    };
 
-    final res = await http.post(uri, headers: {'Content-Type': 'application/json; charset=utf-8'}, body: jsonEncode(payload));
+    final res = await http.post(
+      uri,
+      headers: {'Content-Type': 'application/json; charset=utf-8'},
+      body: jsonEncode(payload),
+    );
 
     if (res.statusCode != 200) {
-      throw Exception('HTTP ${res.statusCode} sur publications_update_status.php');
+      throw Exception(
+        'HTTP ${res.statusCode} sur publications_update_status.php',
+      );
     }
 
     final decoded = json.decode(res.body);
     if (decoded is! Map || decoded['success'] != true) {
-      final err = (decoded is Map) ? (decoded['error']?.toString() ?? 'Erreur update statut') : 'Réponse JSON invalide';
+      final err = (decoded is Map)
+          ? (decoded['error']?.toString() ?? 'Erreur update statut')
+          : 'Réponse JSON invalide';
       throw Exception(err);
     }
   }
 
   Future<void> _openAddSignalement() async {
-    final ok = await Navigator.of(context).push<bool>(MaterialPageRoute(builder: (_) => const AjouterPublicationPage()));
+    final ok = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(builder: (_) => const AjouterPublicationPage()),
+    );
 
     if (ok == true) {
       await _refreshSignalements();
@@ -186,7 +223,12 @@ class _AlerteSignalementPageState extends State<AlerteSignalementPage> with Sing
 
   void _showError(Object e) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(behavior: SnackBarBehavior.floating, content: Text(e.toString())));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        behavior: SnackBarBehavior.floating,
+        content: Text(e.toString()),
+      ),
+    );
   }
 
   Color _statusColor(String status) {
@@ -226,10 +268,15 @@ class _AlerteSignalementPageState extends State<AlerteSignalementPage> with Sing
         }
 
         if (snap.hasError) {
-          return _ErrorView(error: snap.error.toString(), onRetry: _refreshAlertes);
+          return _ErrorView(
+            error: snap.error.toString(),
+            onRetry: _refreshAlertes,
+          );
         }
 
-        final items = (snap.data ?? []).where((x) => x.texte.trim().isNotEmpty).toList();
+        final items = (snap.data ?? [])
+            .where((x) => x.texte.trim().isNotEmpty)
+            .toList();
 
         if (items.isEmpty) {
           return RefreshIndicator(
@@ -261,9 +308,13 @@ class _AlerteSignalementPageState extends State<AlerteSignalementPage> with Sing
                     Row(
                       spacing: 10,
                       children: [
-                        Expanded(child: Container(height: 2, color: Colors.blue[800])),
+                        Expanded(
+                          child: Container(height: 2, color: Colors.blue[800]),
+                        ),
                         Icon(Icons.notifications, color: color),
-                        Expanded(child: Container(height: 2, color: Colors.blue[800])),
+                        Expanded(
+                          child: Container(height: 2, color: Colors.blue[800]),
+                        ),
                       ],
                     ),
                     Padding(
@@ -273,21 +324,37 @@ class _AlerteSignalementPageState extends State<AlerteSignalementPage> with Sing
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            "${DateFormat("EEEE", 'fr').format(date)}".capitalize(),
-                            style: TextStyle(color: color, fontWeight: FontWeight.w600, fontSize: 16),
+                            DateFormat("EEEE", 'fr').format(date).capitalize(),
+                            style: TextStyle(
+                              color: color,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                            ),
                           ),
                           Text(
-                            "${DateFormat("dd", 'fr').format(date)}".capitalize(),
-                            style: TextStyle(color: color, fontWeight: FontWeight.w600, fontSize: 16),
+                            DateFormat("dd", 'fr').format(date).capitalize(),
+                            style: TextStyle(
+                              color: color,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                            ),
                           ),
 
                           Text(
-                            "${DateFormat("MMMM", 'fr').format(date)}".capitalize(),
-                            style: TextStyle(color: color, fontWeight: FontWeight.w600, fontSize: 16),
+                            DateFormat("MMMM", 'fr').format(date).capitalize(),
+                            style: TextStyle(
+                              color: color,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                            ),
                           ),
                           Text(
-                            "${DateFormat("yyyy", 'fr').format(date)}",
-                            style: TextStyle(color: color, fontWeight: FontWeight.w600, fontSize: 16),
+                            DateFormat("yyyy", 'fr').format(date),
+                            style: TextStyle(
+                              color: color,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                            ),
                           ),
                         ],
                       ),
@@ -302,7 +369,13 @@ class _AlerteSignalementPageState extends State<AlerteSignalementPage> with Sing
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             buildTextWithLinks(a.texte),
-                            Text('Par : ${a.nom.isEmpty ? "Administration" : a.nom} • ${_formatDate(a.dateAjout)}', style: const TextStyle(fontSize: 12, color: Colors.black45)),
+                            Text(
+                              'Par : ${a.nom.isEmpty ? "Administration" : a.nom} • ${_formatDate(a.dateAjout)}',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.black45,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -354,7 +427,10 @@ class _AlerteSignalementPageState extends State<AlerteSignalementPage> with Sing
               }
 
               if (snap.hasError) {
-                return _ErrorView(error: snap.error.toString(), onRetry: _refreshSignalements);
+                return _ErrorView(
+                  error: snap.error.toString(),
+                  onRetry: _refreshSignalements,
+                );
               }
 
               final items = snap.data ?? [];
@@ -392,11 +468,19 @@ class _AlerteSignalementPageState extends State<AlerteSignalementPage> with Sing
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 spacing: 12,
                                 children: [
-                                  Icon(Icons.error_outline, color: Colors.orange, size: 30, weight: 600),
+                                  Icon(
+                                    Icons.error_outline,
+                                    color: Colors.orange,
+                                    size: 30,
+                                    weight: 600,
+                                  ),
                                   Expanded(
                                     child: Text(
                                       p.titre,
-                                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
                                     ),
@@ -408,49 +492,95 @@ class _AlerteSignalementPageState extends State<AlerteSignalementPage> with Sing
                                 runSpacing: 4,
                                 children: [
                                   Chip(
-                                    label: Text('Signalement', style: TextStyle(color: Colors.black87)),
+                                    label: Text(
+                                      'Signalement',
+                                      style: TextStyle(color: Colors.black87),
+                                    ),
                                     visualDensity: VisualDensity.compact,
                                     color: WidgetStatePropertyAll(Colors.white),
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
                                   ),
                                   Chip(
-                                    label: Text(p.categorie.isEmpty ? 'Autre' : p.categorie, style: TextStyle(color: Colors.black87)),
+                                    label: Text(
+                                      p.categorie.isEmpty
+                                          ? 'Autre'
+                                          : p.categorie,
+                                      style: TextStyle(color: Colors.black87),
+                                    ),
                                     visualDensity: VisualDensity.compact,
                                     color: WidgetStatePropertyAll(Colors.white),
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
                                   ),
                                   if ((p.secteur ?? '').trim().isNotEmpty)
                                     Chip(
-                                      label: Text(p.secteur!, style: TextStyle(color: Colors.black87)),
+                                      label: Text(
+                                        p.secteur!,
+                                        style: TextStyle(color: Colors.black87),
+                                      ),
                                       visualDensity: VisualDensity.compact,
-                                      color: WidgetStatePropertyAll(Colors.white),
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                                      color: WidgetStatePropertyAll(
+                                        Colors.white,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(15),
+                                      ),
                                     ),
                                   Chip(
-                                    label: Text(_statusLabel(p.statut), style: TextStyle(color: Colors.white)),
+                                    label: Text(
+                                      _statusLabel(p.statut),
+                                      style: TextStyle(color: Colors.white),
+                                    ),
                                     visualDensity: VisualDensity.compact,
-                                    color: WidgetStatePropertyAll(_statusColor(p.statut)),
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                                    color: WidgetStatePropertyAll(
+                                      _statusColor(p.statut),
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
                                   ),
 
                                   if (p.urgence == 'urgent')
                                     Chip(
-                                      label: Text('URGENT', style: TextStyle(color: Colors.black87)),
+                                      label: Text(
+                                        'URGENT',
+                                        style: TextStyle(color: Colors.black87),
+                                      ),
                                       visualDensity: VisualDensity.compact,
-                                      color: WidgetStatePropertyAll(Colors.white),
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                                      color: WidgetStatePropertyAll(
+                                        Colors.white,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(15),
+                                      ),
                                     ),
                                   if (p.urgence == 'faible')
                                     Chip(
-                                      label: Text('Faible', style: TextStyle(color: Colors.black87)),
+                                      label: Text(
+                                        'Faible',
+                                        style: TextStyle(color: Colors.black87),
+                                      ),
                                       visualDensity: VisualDensity.compact,
-                                      color: WidgetStatePropertyAll(Colors.white),
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                                      color: WidgetStatePropertyAll(
+                                        Colors.white,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(15),
+                                      ),
                                     ),
                                 ],
                               ),
                               buildTextWithLinks(p.description),
-                              Text('Par : ${p.auteurNom.isEmpty ? "—" : p.auteurNom} • ${_formatDate(p.createdAt)}', style: const TextStyle(fontSize: 12, color: Colors.black54)),
+                              Text(
+                                'Par : ${p.auteurNom.isEmpty ? "—" : p.auteurNom} • ${_formatDate(p.createdAt)}',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.black54,
+                                ),
+                              ),
                               Align(
                                 alignment: Alignment.centerRight,
                                 child: _TrailingActions(
@@ -496,13 +626,13 @@ class _AlerteSignalementPageState extends State<AlerteSignalementPage> with Sing
   }
 
   static String _formatDate(String isoOrDateTime) {
-    return DateFormat("dd/MM/yyyy à HH:mm").format(DateTime.tryParse(isoOrDateTime) ?? DateTime.now());
+    return DateFormat(
+      "dd/MM/yyyy à HH:mm",
+    ).format(DateTime.tryParse(isoOrDateTime) ?? DateTime.now());
   }
 
   @override
   Widget build(BuildContext context) {
-    final canPost = _userId != null;
-
     return BasePage(
       title: 'Alertes & Signalements',
       body: Column(
@@ -519,13 +649,24 @@ class _AlerteSignalementPageState extends State<AlerteSignalementPage> with Sing
               indicator: BoxDecoration(color: Colors.blue[800]),
               dividerColor: Colors.blue[800],
               tabs: const [
-                Tab(text: 'Alertes', icon: Icon(Icons.notifications), height: 55),
-                Tab(text: 'Signalements', icon: Icon(Icons.report_problem), height: 55),
+                Tab(
+                  text: 'Alertes',
+                  icon: Icon(Icons.notifications),
+                  height: 55,
+                ),
+                Tab(
+                  text: 'Signalements',
+                  icon: Icon(Icons.report_problem),
+                  height: 55,
+                ),
               ],
             ),
           ),
           Expanded(
-            child: TabBarView(controller: _tabController, children: [_buildAlertesBody(), _buildSignalementsBody()]),
+            child: TabBarView(
+              controller: _tabController,
+              children: [_buildAlertesBody(), _buildSignalementsBody()],
+            ),
           ),
         ],
       ),
@@ -543,7 +684,11 @@ class _AlerteSignalementPageState extends State<AlerteSignalementPage> with Sing
 
   Future<void> _ajouterAnnonce() async {
     if (sharedPreferences.getString('nom')?.isEmpty ?? true) {
-      await showModalBottomSheet(context: context, builder: (context) => const LoginBottomSheet(), isScrollControlled: true);
+      await showModalBottomSheet(
+        context: context,
+        builder: (context) => const LoginBottomSheet(),
+        isScrollControlled: true,
+      );
       setState(() {
         _userId = sharedPreferences.getInt('user_id');
       });
@@ -587,11 +732,18 @@ class _TrailingActions extends StatelessWidget {
   final Future<void> Function() onLike;
   final Future<void> Function(String newStatus) onChangeStatus;
 
-  const _TrailingActions({required this.publication, required this.canInteract, required this.currentUserId, required this.onLike, required this.onChangeStatus});
+  const _TrailingActions({
+    required this.publication,
+    required this.canInteract,
+    required this.currentUserId,
+    required this.onLike,
+    required this.onChangeStatus,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final isAuthor = (currentUserId != null && currentUserId == publication.userId);
+    final isAuthor =
+        (currentUserId != null && currentUserId == publication.userId);
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -604,15 +756,33 @@ class _TrailingActions extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(publication.likedByMe ? Icons.thumb_up : Icons.thumb_up_outlined, size: 25, color: publication.likedByMe ? Colors.blue[800] : Colors.black87),
+                Icon(
+                  publication.likedByMe
+                      ? Icons.thumb_up
+                      : Icons.thumb_up_outlined,
+                  size: 25,
+                  color: publication.likedByMe
+                      ? Colors.blue[800]
+                      : Colors.black87,
+                ),
                 const SizedBox(width: 4),
-                Text('${publication.likesCount}', style: TextStyle(fontSize: 14, color: publication.likedByMe ? Colors.blue[800] : Colors.black87)),
+                Text(
+                  '${publication.likesCount}',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: publication.likedByMe
+                        ? Colors.blue[800]
+                        : Colors.black87,
+                  ),
+                ),
               ],
             ),
           ),
         ),
         PopupMenuButton<String>(
-          tooltip: isAuthor ? 'Changer statut' : "Statut (seul l'auteur peut modifier)",
+          tooltip: isAuthor
+              ? 'Changer statut'
+              : "Statut (seul l'auteur peut modifier)",
           enabled: canInteract && isAuthor,
           onSelected: (v) => onChangeStatus(v),
           itemBuilder: (_) => const [
@@ -643,7 +813,10 @@ class _ErrorView extends StatelessWidget {
           children: [
             Text('Erreur: $error', textAlign: TextAlign.center),
             const SizedBox(height: 12),
-            ElevatedButton(onPressed: () => onRetry(), child: const Text('Réessayer')),
+            ElevatedButton(
+              onPressed: () => onRetry(),
+              child: const Text('Réessayer'),
+            ),
           ],
         ),
       ),
@@ -672,7 +845,11 @@ Widget buildTextWithLinks(String text) {
     spans.add(
       TextSpan(
         text: url,
-        style: const TextStyle(fontSize: 15, color: Colors.blue, decoration: TextDecoration.underline),
+        style: const TextStyle(
+          fontSize: 15,
+          color: Colors.blue,
+          decoration: TextDecoration.underline,
+        ),
         recognizer: TapGestureRecognizer()
           ..onTap = () async {
             final uri = Uri.parse(url);
@@ -699,7 +876,10 @@ Widget buildTextWithLinks(String text) {
   }
 
   return RichText(
-    text: TextSpan(children: spans, style: GoogleFonts.poppins().copyWith(fontSize: 15)),
+    text: TextSpan(
+      children: spans,
+      style: GoogleFonts.poppins().copyWith(fontSize: 15),
+    ),
   );
 }
 
@@ -710,7 +890,13 @@ class AlerteItem {
   final String nom;
   final String dateAjout;
 
-  AlerteItem({required this.id, required this.texte, required this.nature, required this.nom, required this.dateAjout});
+  AlerteItem({
+    required this.id,
+    required this.texte,
+    required this.nature,
+    required this.nom,
+    required this.dateAjout,
+  });
 
   factory AlerteItem.fromJson(Map<String, dynamic> j) {
     return AlerteItem(
@@ -794,5 +980,9 @@ class ToggleLikeResult {
   final int likesCount;
   final String action;
 
-  ToggleLikeResult({required this.likedByMe, required this.likesCount, required this.action});
+  ToggleLikeResult({
+    required this.likedByMe,
+    required this.likesCount,
+    required this.action,
+  });
 }

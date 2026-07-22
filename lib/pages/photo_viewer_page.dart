@@ -39,9 +39,7 @@ class _PhotoViewerPageState extends State<PhotoViewerPage> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: Text(
-          '${currentIndex + 1}/${widget.photos.length}',
-        ),
+        title: Text('${currentIndex + 1}/${widget.photos.length}'),
         backgroundColor: Colors.black,
       ),
       body: PageView.builder(
@@ -59,18 +57,12 @@ class _PhotoViewerPageState extends State<PhotoViewerPage> {
             imageProvider: NetworkImage(imageUrl),
             minScale: PhotoViewComputedScale.contained,
             maxScale: PhotoViewComputedScale.covered * 3,
-            backgroundDecoration:
-                const BoxDecoration(color: Colors.black),
+            backgroundDecoration: const BoxDecoration(color: Colors.black),
             loadingBuilder: (context, event) =>
                 const Center(child: CircularProgressIndicator()),
-            errorBuilder: (context, error, stackTrace) =>
-                const Center(
-                  child: Icon(
-                    Icons.broken_image,
-                    color: Colors.white,
-                    size: 60,
-                  ),
-                ),
+            errorBuilder: (context, error, stackTrace) => const Center(
+              child: Icon(Icons.broken_image, color: Colors.white, size: 60),
+            ),
           );
         },
       ),

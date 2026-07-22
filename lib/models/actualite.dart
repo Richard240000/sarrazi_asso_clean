@@ -2,7 +2,7 @@ class Actualite {
   final int id;
   final String texte;
   final String? nature; // Nouveau champ optionnel
-  final String? nom;    // Nouveau champ optionnel
+  final String? nom; // Nouveau champ optionnel
   final DateTime dateAjout;
 
   Actualite({
@@ -18,9 +18,8 @@ class Actualite {
       id: json['id'] ?? 0, // Ajout de la gestion de l'ID
       texte: json['texte'],
       nature: json['nature'], // Nouveau champ
-      nom: json['nom'],       // Nouveau champ
+      nom: json['nom'], // Nouveau champ
       dateAjout: DateTime.parse(json['date_ajout']),
     );
   }
 }
-

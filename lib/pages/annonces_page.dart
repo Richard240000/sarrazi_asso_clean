@@ -377,8 +377,9 @@ class _AnnoncesPagesState extends State<AnnoncesPages> {
                                           ),
                                           decoration: BoxDecoration(
                                             color: Colors.black54,
-                                            borderRadius:
-                                                BorderRadius.circular(12),
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
                                           ),
                                           child: Text(
                                             "${photos.length} photos",
@@ -399,7 +400,7 @@ class _AnnoncesPagesState extends State<AnnoncesPages> {
                                     padding: const EdgeInsets.all(8),
                                     scrollDirection: Axis.horizontal,
                                     itemCount: photos.length,
-                                    separatorBuilder: (_, __) =>
+                                    separatorBuilder: (_, _) =>
                                         const SizedBox(width: 8),
                                     itemBuilder: (context, photoIndex) {
                                       return GestureDetector(
@@ -408,8 +409,9 @@ class _AnnoncesPagesState extends State<AnnoncesPages> {
                                           initialIndex: photoIndex,
                                         ),
                                         child: ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(6),
+                                          borderRadius: BorderRadius.circular(
+                                            6,
+                                          ),
                                           child: Image.network(
                                             photos[photoIndex],
                                             width: 70,
@@ -491,6 +493,8 @@ class _AnnoncesPagesState extends State<AnnoncesPages> {
         builder: (context) => const LoginBottomSheet(),
         isScrollControlled: true,
       );
+
+      if (!mounted) return;
 
       setState(() {
         utilisateur = sharedPreferences.getString('nom');
