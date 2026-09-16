@@ -15,7 +15,7 @@ dependencies:
   firebase_core: ^4.1.1
   firebase_messaging: ^16.0.2
   flutter_local_notifications: ^19.4.2
-  url_launcher: ^6.3.0 # ou la dernière version disponible
+  url_launcher: ^6.3.2 # ou la dernière version disponible
   url_launcher_android: ^6.2.5
   http: ^1.2.1
   webview_flutter: ^4.13.1

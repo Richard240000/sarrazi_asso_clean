@@ -390,6 +390,47 @@ class _AlerteSignalementPageState extends State<AlerteSignalementPage>
     );
   }
 
+  Widget _buildSignalementPhoto(String filename) {
+    // Le PHP stocke uniquement le nom du fichier dans publications.photo.
+    final photoUrl =
+        '${baseUrl}uploads_signalements/${Uri.encodeComponent(filename)}';
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: Image.network(
+        photoUrl,
+        width: double.infinity,
+        height: 240,
+        fit: BoxFit.contain,
+        semanticLabel: 'Photo du signalement',
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          final total = loadingProgress.expectedTotalBytes;
+          return SizedBox(
+            height: 240,
+            child: Center(
+              child: CircularProgressIndicator(
+                value: total != null && total > 0
+                    ? loadingProgress.cumulativeBytesLoaded / total
+                    : null,
+              ),
+            ),
+          );
+        },
+        errorBuilder: (context, error, stackTrace) => const SizedBox(
+          width: double.infinity,
+          height: 60,
+          child: Center(
+            child: Text(
+              'Photo indisponible',
+              style: TextStyle(color: Colors.black54),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildSignalementsBody() {
     final canPost = _userId != null;
 
@@ -574,6 +615,8 @@ class _AlerteSignalementPageState extends State<AlerteSignalementPage>
                                 ],
                               ),
                               buildTextWithLinks(p.description),
+                              if ((p.photo ?? '').isNotEmpty)
+                                _buildSignalementPhoto(p.photo!),
                               Text(
                                 'Par : ${p.auteurNom.isEmpty ? "—" : p.auteurNom} • ${_formatDate(p.createdAt)}',
                                 style: const TextStyle(
@@ -921,6 +964,7 @@ class Publication {
   final String description;
   final String categorie;
   final String? secteur;
+  final String? photo;
 
   String statut;
   final String urgence;
@@ -940,6 +984,7 @@ class Publication {
     required this.description,
     required this.categorie,
     required this.secteur,
+    this.photo,
     required this.statut,
     required this.urgence,
     required this.userId,
@@ -958,6 +1003,7 @@ class Publication {
       description: (j['description'] ?? '').toString(),
       categorie: (j['categorie'] ?? '').toString(),
       secteur: (j['secteur'] == null) ? null : j['secteur'].toString(),
+      photo: j['photo']?.toString().trim(),
       statut: (j['statut'] ?? 'nouveau').toString(),
       urgence: (j['urgence'] ?? 'normal').toString(),
       userId: _asInt(j['user_id']),

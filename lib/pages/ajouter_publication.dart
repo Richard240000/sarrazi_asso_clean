@@ -8,8 +8,13 @@
 // Pré-requis pubspec.yaml :
 //   http
 //   shared_preferences
+//   image_picker, http_parser, mime
 
 import 'dart:convert';
+import 'dart:typed_data';
+import 'package:http_parser/http_parser.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:mime/mime.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:sarrazi_asso_clean/pages/base_page.dart';
@@ -27,6 +32,12 @@ class _AjouterPublicationPageState extends State<AjouterPublicationPage> {
 
   final _formKey = GlobalKey<FormState>();
 
+  static const int _maxPhotoBytes = 5 * 1024 * 1024;
+  final ImagePicker _picker = ImagePicker();
+  Uint8List? _photoBytes;
+  String? _photoMime;
+  String? _photoFilename;
+  bool _pickingPhoto = false;
   bool _submitting = false;
   int? _userId;
 
@@ -57,6 +68,7 @@ class _AjouterPublicationPageState extends State<AjouterPublicationPage> {
   Future<void> _loadUserId() async {
     final prefs = await SharedPreferences.getInstance();
     final uid = prefs.getInt('user_id');
+    if (!mounted) return;
 
     setState(() {
       _userId = uid;
@@ -74,7 +86,114 @@ class _AjouterPublicationPageState extends State<AjouterPublicationPage> {
     }
   }
 
+  Future<void> _choosePhoto() async {
+    if (_submitting || _pickingPhoto) return;
+    setState(() => _pickingPhoto = true);
+    try {
+      final picked = await _picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1920,
+        maxHeight: 1920,
+        imageQuality: 85,
+        requestFullMetadata: false,
+      );
+      if (picked == null || !mounted) return;
+      if (await picked.length() > _maxPhotoBytes) {
+        throw Exception('Photo trop volumineuse (5 Mo maximum).');
+      }
+      final bytes = await picked.readAsBytes();
+      if (bytes.isEmpty || bytes.length > _maxPhotoBytes) {
+        throw Exception('La photo doit être non vide et ne pas dépasser 5 Mo.');
+      }
+      // Identification par le contenu, sans faire confiance au nom du fichier.
+      final mime = lookupMimeType('', headerBytes: bytes);
+      const extensions = {
+        'image/jpeg': 'jpg',
+        'image/png': 'png',
+        'image/webp': 'webp',
+      };
+      final extension = extensions[mime];
+      if (extension == null) {
+        throw Exception('Choisissez une photo JPG, PNG ou WebP.');
+      }
+      if (!mounted) return;
+      setState(() {
+        _photoBytes = bytes;
+        _photoMime = mime;
+        _photoFilename = 'signalement.$extension';
+      });
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          content: Text('Impossible de sélectionner la photo : $e'),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _pickingPhoto = false);
+    }
+  }
+
+  Widget _buildPhotoPicker() {
+    final bytes = _photoBytes;
+    final busy = _submitting || _pickingPhoto;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Text(
+          'Photo (facultative)',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8),
+        const Text('Une photo JPG, PNG ou WebP, de 5 Mo maximum.'),
+        if (bytes != null) ...[
+          const SizedBox(height: 12),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.memory(
+              bytes,
+              height: 200,
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) => const SizedBox(
+                height: 80,
+                child: Center(child: Text('Aperçu indisponible')),
+              ),
+            ),
+          ),
+        ],
+        const SizedBox(height: 8),
+        OutlinedButton.icon(
+          onPressed: busy ? null : _choosePhoto,
+          icon: const Icon(Icons.photo_library_outlined),
+          label: Text(
+            _pickingPhoto
+                ? 'Chargement de la photo…'
+                : bytes == null
+                ? 'Ajouter une photo'
+                : 'Remplacer la photo',
+          ),
+        ),
+        if (bytes != null)
+          TextButton.icon(
+            onPressed: busy
+                ? null
+                : () {
+                    setState(() {
+                      _photoBytes = null;
+                      _photoMime = null;
+                      _photoFilename = null;
+                    });
+                  },
+            icon: const Icon(Icons.delete_outline),
+            label: const Text('Supprimer la photo'),
+          ),
+      ],
+    );
+  }
+
   Future<void> _submit() async {
+    if (_submitting || _pickingPhoto) return;
     if (_userId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -100,30 +219,46 @@ class _AjouterPublicationPageState extends State<AjouterPublicationPage> {
     try {
       final uri = Uri.parse('${baseUrl}publications_add.php');
 
-      final payload = <String, dynamic>{
-        'user_id': _userId,
+      final request = http.MultipartRequest('POST', uri);
+      request.fields.addAll({
+        'user_id': _userId.toString(),
         'type': _type,
         'titre': titre,
         'description': description,
         'categorie': categorie,
-        'secteur': secteur.isEmpty ? null : secteur,
+        // Le PHP convertit le secteur vide en NULL.
+        'secteur': secteur,
         'urgence': _urgence,
-      };
+      });
 
-      final res = await http.post(
-        uri,
-        headers: {'Content-Type': 'application/json; charset=utf-8'},
-        body: jsonEncode(payload),
-      );
-
-      if (res.statusCode != 200) {
-        throw Exception('HTTP ${res.statusCode} sur publications_add.php');
+      final photoBytes = _photoBytes;
+      if (photoBytes != null) {
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'photo',
+            photoBytes,
+            filename: _photoFilename!,
+            contentType: MediaType.parse(_photoMime!),
+          ),
+        );
       }
 
-      final decoded = jsonDecode(res.body);
-      if (decoded is! Map || decoded['success'] != true) {
-        final err = (decoded is Map)
-            ? (decoded['error']?.toString() ?? 'Erreur ajout')
+      // MultipartRequest définit lui-même le Content-Type et sa boundary.
+      final res = await http.Response.fromStream(await request.send());
+      dynamic decoded;
+      try {
+        decoded = jsonDecode(utf8.decode(res.bodyBytes));
+      } on FormatException {
+        throw Exception(
+          'Réponse du serveur invalide (HTTP ${res.statusCode}).',
+        );
+      }
+      if (res.statusCode != 200 ||
+          decoded is! Map ||
+          decoded['success'] != true) {
+        final err = decoded is Map
+            ? (decoded['error']?.toString() ??
+                  'Erreur ajout (HTTP ${res.statusCode})')
             : 'Réponse JSON invalide';
         throw Exception(err);
       }
@@ -248,6 +383,8 @@ class _AjouterPublicationPageState extends State<AjouterPublicationPage> {
                       },
                     ),
                     const SizedBox(height: 18),
+                    _buildPhotoPicker(),
+                    const SizedBox(height: 18),
                     const Text(
                       "Signalement publié après validation",
                       style: TextStyle(
@@ -260,7 +397,9 @@ class _AjouterPublicationPageState extends State<AjouterPublicationPage> {
                     const SizedBox(height: 18),
 
                     ElevatedButton.icon(
-                      onPressed: _submitting ? null : _submit,
+                      onPressed: (_submitting || _pickingPhoto)
+                          ? null
+                          : _submit,
                       icon: _submitting
                           ? const SizedBox(
                               width: 18,

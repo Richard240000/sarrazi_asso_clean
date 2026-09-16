@@ -20,7 +20,7 @@ class _AnnoncesPagesState extends State<AnnoncesPages> {
   List annonces = [];
   bool loading = true;
   String? utilisateur;
-
+  int commentairesRefresh = 0;
   @override
   void initState() {
     super.initState();
@@ -249,6 +249,163 @@ class _AnnoncesPagesState extends State<AnnoncesPages> {
     );
   }
 
+  Future<void> ajouterCommentaireAnnonce(dynamic annonce) async {
+    final int annonceId = int.parse(annonce['id'].toString());
+
+    final String? nom = sharedPreferences.getString('nom');
+    final String? email = sharedPreferences.getString('email');
+
+    if (nom == null || email == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Vous devez être connecté pour commenter."),
+        ),
+      );
+      return;
+    }
+
+    final controller = TextEditingController();
+
+    final bool? publier = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text("Ajouter un commentaire"),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+            maxLines: 4,
+            decoration: const InputDecoration(
+              hintText: "Votre commentaire...",
+              border: OutlineInputBorder(),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text("Annuler"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (controller.text.trim().isNotEmpty) {
+                  Navigator.pop(dialogContext, true);
+                }
+              },
+              child: const Text("Publier"),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (publier != true) {
+      controller.dispose();
+      return;
+    }
+
+    final resultat = await HttpService.ajouterCommentaire(
+      annonceId: annonceId,
+      auteurNom: nom,
+      auteurEmail: email,
+      commentaire: controller.text.trim(),
+    );
+
+    controller.dispose();
+
+    if (!mounted) return;
+
+    if (resultat.isSuccess) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Commentaire publié.")));
+
+      setState(() {
+        commentairesRefresh++;
+      });
+    } else {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(resultat.data.toString())));
+    }
+  }
+
+  Widget buildCommentaires(dynamic annonce) {
+    final int annonceId = int.parse(annonce['id'].toString());
+
+    return FutureBuilder<Tuple>(
+      key: ValueKey("$annonceId-$commentairesRefresh"),
+      future: HttpService.chargerCommentaires(annonceId),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Padding(
+            padding: EdgeInsets.all(10),
+            child: Center(
+              child: SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            ),
+          );
+        }
+
+        if (!snapshot.hasData || !snapshot.data!.isSuccess) {
+          return const SizedBox.shrink();
+        }
+
+        final List commentaires = snapshot.data!.data as List;
+
+        return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
+          decoration: BoxDecoration(
+            color: Colors.grey[100],
+            border: Border(top: BorderSide(color: Colors.grey.shade300)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                commentaires.length == 1
+                    ? "1 commentaire"
+                    : "${commentaires.length} commentaires",
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 8),
+
+              for (final commentaire in commentaires) ...[
+                Text(
+                  commentaire['auteur_nom']?.toString() ?? 'Inconnu',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  commentaire['commentaire']?.toString() ?? '',
+                  style: const TextStyle(fontSize: 14),
+                ),
+                const SizedBox(height: 8),
+              ],
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  onPressed: () => ajouterCommentaireAnnonce(annonce),
+                  icon: const Icon(Icons.add_comment_outlined),
+                  label: const Text("Ajouter un commentaire"),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   Widget getBody() {
     return Column(
       children: [
@@ -464,6 +621,8 @@ class _AnnoncesPagesState extends State<AnnoncesPages> {
                                 ],
                               ),
                             ),
+
+                            buildCommentaires(a),
                           ],
                         ),
                       );

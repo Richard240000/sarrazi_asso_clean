@@ -90,6 +90,48 @@ class HttpService {
     return await get("liste_annonces.php");
   }
 
+  static Future<Tuple> chargerCommentaires(int annonceId) async {
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+
+    return await get(
+      "commentaires_list.php",
+      query: "annonce_id=$annonceId&t=$timestamp",
+    );
+  }
+
+  static Future<Tuple> ajouterCommentaire({
+    required int annonceId,
+    required String auteurNom,
+    required String auteurEmail,
+    required String commentaire,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse("${baseUrl}/commentaire_add.php"),
+        body: {
+          "annonce_id": annonceId.toString(),
+          "auteur_nom": auteurNom,
+          "auteur_email": auteurEmail,
+          "commentaire": commentaire,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+
+        if (data["status"] == "success") {
+          return Tuple(true, data);
+        } else {
+          return Tuple(false, data["message"] ?? "Erreur inconnue");
+        }
+      }
+
+      return Tuple(false, "Erreur HTTP ${response.statusCode}");
+    } catch (e) {
+      return Tuple(false, e.toString());
+    }
+  }
+
   static Future<Tuple> chargerDocuments() async {
     return await get("get_documents.php");
   }
