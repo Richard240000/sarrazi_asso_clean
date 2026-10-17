@@ -221,6 +221,29 @@ class _AlerteSignalementPageState extends State<AlerteSignalementPage>
     }
   }
 
+  Future<void> _openCommentaires(Publication publication) async {
+    if (sharedPreferences.getInt('user_id') == null) {
+      await showModalBottomSheet<bool>(
+        context: context,
+        isScrollControlled: true,
+        builder: (_) => const LoginBottomSheet(),
+      );
+    }
+    if (!mounted) return;
+    final userId = sharedPreferences.getInt('user_id');
+    if (userId == null || userId <= 0) return;
+    setState(() => _userId = userId);
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => _SignalementDiscussionPage(
+          publication: publication,
+          baseUrl: baseUrl,
+        ),
+      ),
+    );
+    if (mounted) await _refreshSignalements();
+  }
+
   void _showError(Object e) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
@@ -453,7 +476,7 @@ class _AlerteSignalementPageState extends State<AlerteSignalementPage>
           const Padding(
             padding: EdgeInsets.fromLTRB(12, 6, 12, 6),
             child: Text(
-              "Lecture possible sans connexion. Connectez-vous pour publier, liker et changer le statut.",
+              "Lecture possible sans connexion. Connectez-vous pour publier, commenter, consulter les échanges, liker et changer le statut.",
               style: TextStyle(fontSize: 12, color: Colors.black54),
               textAlign: TextAlign.center,
             ),
@@ -615,6 +638,15 @@ class _AlerteSignalementPageState extends State<AlerteSignalementPage>
                                 ],
                               ),
                               buildTextWithLinks(p.description),
+                              TextButton.icon(
+                                onPressed: () => _openCommentaires(p),
+                                icon: const Icon(Icons.forum_outlined),
+                                label: Text(
+                                  p.commentsCount == 0
+                                      ? 'Commentaires et réponses'
+                                      : 'Commentaires et réponses (${p.commentsCount})',
+                                ),
+                              ),
                               if ((p.photo ?? '').isNotEmpty)
                                 _buildSignalementPhoto(p.photo!),
                               Text(
@@ -976,6 +1008,7 @@ class Publication {
 
   int likesCount;
   bool likedByMe;
+  final int commentsCount;
 
   Publication({
     required this.id,
@@ -993,6 +1026,7 @@ class Publication {
     required this.updatedAt,
     required this.likesCount,
     required this.likedByMe,
+    this.commentsCount = 0,
   });
 
   factory Publication.fromJson(Map<String, dynamic> j) {
@@ -1012,6 +1046,7 @@ class Publication {
       updatedAt: j['updated_at']?.toString(),
       likesCount: _asInt(j['likes_count']),
       likedByMe: _asInt(j['liked_by_me']) == 1,
+      commentsCount: _asInt(j['comments_count']),
     );
   }
 
@@ -1031,4 +1066,324 @@ class ToggleLikeResult {
     required this.likesCount,
     required this.action,
   });
+}
+
+class _SignalementDiscussionPage extends StatefulWidget {
+  final Publication publication;
+  final String baseUrl;
+  const _SignalementDiscussionPage({
+    required this.publication,
+    required this.baseUrl,
+  });
+
+  @override
+  State<_SignalementDiscussionPage> createState() =>
+      _SignalementDiscussionPageState();
+}
+
+class _SignalementDiscussionPageState
+    extends State<_SignalementDiscussionPage> {
+  final _controller = TextEditingController();
+  late Future<List<Map<String, dynamic>>> _future;
+  Map<String, dynamic>? _replyTo;
+  bool _sending = false;
+  String? _sendError;
+
+  @override
+  void initState() {
+    super.initState();
+    _future = _load();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  int _userId() {
+    final id = sharedPreferences.getInt('user_id');
+    if (id == null || id <= 0)
+      throw Exception('Connectez-vous pour consulter ou envoyer un message.');
+    return id;
+  }
+
+  Map<String, dynamic> _decode(http.Response response) {
+    dynamic body;
+    try {
+      body = jsonDecode(utf8.decode(response.bodyBytes));
+    } catch (_) {
+      throw Exception(
+        'Réponse du serveur invalide (HTTP ${response.statusCode}).',
+      );
+    }
+    if (body is! Map<String, dynamic>)
+      throw Exception('Réponse du serveur invalide.');
+    if (body['success'] != true || response.statusCode != 200) {
+      throw Exception(
+        body['error']?.toString() ??
+            'Erreur serveur (HTTP ${response.statusCode}).',
+      );
+    }
+    return body;
+  }
+
+  Future<List<Map<String, dynamic>>> _load() async {
+    final uri = Uri.parse('${widget.baseUrl}publications_comments_list.php')
+        .replace(
+          queryParameters: {
+            'publication_id': widget.publication.id.toString(),
+            'user_id': _userId().toString(),
+            't': DateTime.now().millisecondsSinceEpoch.toString(),
+          },
+        );
+    final response = await http.get(uri).timeout(const Duration(seconds: 30));
+    final data = _decode(response)['data'];
+    if (data is! List) throw Exception('Liste de commentaires invalide.');
+    return data.map((item) => Map<String, dynamic>.from(item as Map)).toList();
+  }
+
+  Future<void> _refresh() async {
+    if (!mounted) return;
+    final future = _load();
+    setState(() {
+      _future = future;
+    });
+    try {
+      await future;
+    } catch (_) {
+      // L'erreur et le bouton Réessayer sont affichés par FutureBuilder.
+    }
+  }
+
+  Future<void> _send() async {
+    if (_sending) return;
+    final text = _controller.text.trim();
+    if (text.isEmpty || text.runes.length > 5000) {
+      setState(() => _sendError = 'Saisissez entre 1 et 5 000 caractères.');
+      return;
+    }
+    setState(() {
+      _sending = true;
+      _sendError = null;
+    });
+    try {
+      final response = await http.post(
+        Uri.parse('${widget.baseUrl}publications_comments_add.php'),
+        headers: {'Content-Type': 'application/json; charset=utf-8'},
+        body: jsonEncode({
+          'publication_id': widget.publication.id,
+          'user_id': _userId(),
+          'commentaire': text,
+          'parent_id': _replyTo?['id'],
+        }),
+      );
+      final result = _decode(response);
+      if (!mounted) return;
+      _controller.clear();
+      setState(() => _replyTo = null);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            result['notification_sent'] == false
+                ? 'Message publié. La notification n’a pas pu être envoyée.'
+                : 'Message publié.',
+          ),
+        ),
+      );
+      await _refresh();
+    } catch (e) {
+      if (mounted)
+        setState(
+          () => _sendError =
+              '$e\nSi l’envoi a été interrompu, actualisez la discussion avant de réessayer pour éviter un doublon.',
+        );
+    } finally {
+      if (mounted) setState(() => _sending = false);
+    }
+  }
+
+  Widget _message(Map<String, dynamic> message, {bool reply = false}) {
+    final name = message['auteur_nom']?.toString() ?? '';
+    final date = DateTime.tryParse(message['date_creation']?.toString() ?? '');
+    return Padding(
+      padding: EdgeInsets.only(left: reply ? 24 : 0, bottom: 8),
+      child: Card(
+        margin: EdgeInsets.zero,
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                name.isEmpty ? 'Utilisateur' : name,
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+              if (date != null)
+                Text(
+                  DateFormat('dd/MM/yyyy à HH:mm').format(date),
+                  style: const TextStyle(fontSize: 12, color: Colors.black54),
+                ),
+              const SizedBox(height: 8),
+              Text(message['commentaire']?.toString() ?? ''),
+              if (!reply)
+                TextButton.icon(
+                  onPressed: _sending
+                      ? null
+                      : () => setState(() {
+                          _replyTo = message;
+                          _sendError = null;
+                        }),
+                  icon: const Icon(Icons.reply, size: 18),
+                  label: const Text('Répondre'),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PopScope(
+      canPop: !_sending,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Commentaires'),
+          actions: [
+            IconButton(
+              tooltip: 'Actualiser',
+              onPressed: _sending ? null : _refresh,
+              icon: const Icon(Icons.refresh),
+            ),
+          ],
+        ),
+        body: SafeArea(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: Text(
+                  widget.publication.titre,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: FutureBuilder<List<Map<String, dynamic>>>(
+                  future: _future,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting)
+                      return const Center(child: CircularProgressIndicator());
+                    if (snapshot.hasError)
+                      return _ErrorView(
+                        error: '${snapshot.error}',
+                        onRetry: _refresh,
+                      );
+                    final messages = snapshot.data ?? [];
+                    final roots = messages
+                        .where((m) => m['parent_id'] == null)
+                        .toList();
+                    final replies = <String, List<Map<String, dynamic>>>{};
+                    for (final message in messages) {
+                      if (message['parent_id'] != null) {
+                        replies
+                            .putIfAbsent('${message['parent_id']}', () => [])
+                            .add(message);
+                      }
+                    }
+                    return RefreshIndicator(
+                      onRefresh: _refresh,
+                      child: ListView(
+                        padding: const EdgeInsets.all(12),
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children: [
+                          Text(
+                            '${messages.length} message${messages.length == 1 ? '' : 's'}',
+                          ),
+                          const SizedBox(height: 12),
+                          if (messages.isEmpty)
+                            const Text(
+                              'Aucun commentaire. Vous pouvez commencer la discussion.',
+                            ),
+                          for (final root in roots) ...[
+                            _message(root),
+                            for (final reply
+                                in replies['${root['id']}'] ??
+                                    <Map<String, dynamic>>[])
+                              _message(reply, reply: true),
+                          ],
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (_replyTo != null)
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'Réponse à ${_replyTo!['auteur_nom']}',
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          IconButton(
+                            tooltip: 'Annuler la réponse',
+                            onPressed: _sending
+                                ? null
+                                : () => setState(() => _replyTo = null),
+                            icon: const Icon(Icons.close),
+                          ),
+                        ],
+                      ),
+                    TextField(
+                      controller: _controller,
+                      enabled: !_sending,
+                      minLines: 1,
+                      maxLines: 4,
+                      maxLength: 5000,
+                      decoration: InputDecoration(
+                        hintText: _replyTo == null
+                            ? 'Votre commentaire…'
+                            : 'Votre réponse…',
+                        border: const OutlineInputBorder(),
+                      ),
+                    ),
+                    if (_sendError != null)
+                      Text(
+                        _sendError!,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    const SizedBox(height: 8),
+                    FilledButton.icon(
+                      onPressed: _sending ? null : _send,
+                      icon: _sending
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.send),
+                      label: Text(_sending ? 'Envoi en cours…' : 'Publier'),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
