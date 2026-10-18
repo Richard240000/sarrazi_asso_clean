@@ -67,7 +67,7 @@ Future<void> main() async {
 
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-    await initializeDateFormatting('fr-FR');
+    await initializeDateFormatting('fr_FR');
   } catch (e) {
     debugPrint("Erreur pendant l'initialisation de l'application : $e");
   }
